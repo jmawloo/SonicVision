@@ -16,24 +16,38 @@
 //ML_MODEL_CLASS_NAME_STRING=@\"$(ML_MODEL_CLASS_NAME)\"
 
 #import ML_MODEL_CLASS_HEADER_STRING
+//#import ML_MODEL_OBJ_HEADER_STRING
 #import "ImagePlatform.h"
 
 @import CoreML;
 @import Vision;
+@import AVFoundation;   // Video frame capture
+
+// TODO: increase contrast + sharpness of image to give more well-defined edges? Also LPF far away details?
+// TODO: ideal demo environment in synopsium; light background uniform environment to give more contrast to well-recognized/easily distinguishable objects.
 
 @interface ViewController ()  <UINavigationControllerDelegate, UIImagePickerControllerDelegate>
 
 @property (nonatomic, strong) ML_MODEL_CLASS *fcrn;
+//@property (nonatomic, strong) ML_MODEL_OBJ *yolov3;
+
 @property (nonatomic, strong) VNCoreMLModel *model;
+@property (nonatomic, strong) VNCoreMLModel *model2;
+
 @property (nonatomic, strong) VNCoreMLRequest *request;
 @property (nonatomic, strong) VNImageRequestHandler *handler;
 
 @property (nonatomic, strong) ImagePlatform* imagePlatform;
 
+@property (nonatomic, strong) AVCaptureStillImageOutput *stillImageInput;
+@property (nonatomic, strong) AVCaptureSession *session;
+@property (nonatomic, strong) NSTimer *timer;
+
+
 @property (nonatomic, weak) IBOutlet UIImageView *inputImageView;
 @property (nonatomic, strong) NSString *mediaType;
-@property (nonatomic, strong) UIImage *croppedInputImage;
-@property (nonatomic, weak) IBOutlet UIImageView *croppedInputImageView;
+@property (nonatomic, strong) UIImage *classifiedImage;
+@property (nonatomic, weak) IBOutlet UIImageView *classifiedImageView;
 
 @property (nonatomic, strong) UIImage *disparityImage;
 @property (nonatomic, weak) IBOutlet UIImageView *disparityImageImageView;
@@ -48,7 +62,15 @@
 @property (nonatomic, weak) IBOutlet UIButton *imageOpenButton;
 @property (nonatomic, weak) IBOutlet UIButton *depthImageSaveButton;
 
+@property (nonatomic, weak) IBOutlet UISwitch *toggleVideoCapture;
+@property (nonatomic, weak) IBOutlet UISlider *framerate;
+
+// FPS
+@property (nonatomic, weak) IBOutlet UILabel *fpsDepth;
+@property (nonatomic, weak) IBOutlet UILabel *fpsClassify;
+
 @end
+
 
 @implementation ViewController
 
@@ -58,7 +80,7 @@
     self.imagePlatform = [[ImagePlatform alloc] init];
     
     [self updateStatusLabelText:@"Loading model"];
-    self.imageOpenButton.enabled = NO;
+    self.imageOpenButton.enabled = YES;
     self.depthImageSaveButton.enabled = NO;
        
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
@@ -70,10 +92,13 @@
 - (void)loadModel {
     NSError *error = nil;
     self.fcrn = [[ML_MODEL_CLASS alloc] init];
+//    self.yolov3 = [[ML_MODEL_OBJ alloc] init];
+    
     self.model = [VNCoreMLModel modelForMLModel:self.fcrn.model error:&error];
+//    self.model2 = [VNCoreMLModel modelForMLModel:self.yolov3.model error:&error];
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (self.model != nil) {
+        if (self.model != nil /*&& self.model2 != nil*/) {
             [self didLoadModel];
         } else {
             [self didFailToLoadModelWithError:error];
@@ -86,10 +111,6 @@
     //self.textView.stringValue = NSLocalizedString(@"depthPrediction.readyToOpen", @"Please open an image");
     NSLog(@"didLoadModel (\"%@\")", ML_MODEL_CLASS_NAME_STRING);
     [self updateStatusLabelText:[NSString stringWithFormat:@"didLoadModel (\"%@\")", ML_MODEL_CLASS_NAME_STRING]];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.imageOpenButton.enabled = NO;
-        [self openImagePickerAndSelectImage];
-    });
     
 }
 
@@ -99,7 +120,87 @@
     [self updateStatusLabelText:[NSString stringWithFormat:@"Error loading model (\"%@\") because \"%@\"", ML_MODEL_CLASS_NAME_STRING, error.localizedDescription]];
 }
 
-#pragma mark - Status label
+# pragma mark - Video Frame Capture
+
+- (void)setupCameraSession {
+
+
+    self.session = [[AVCaptureSession alloc] init];
+    [self.session setSessionPreset:AVCaptureSessionPresetLow];
+
+    AVCaptureDevice *inputDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    NSError *error;
+    AVCaptureDeviceInput *deviceInput = [AVCaptureDeviceInput deviceInputWithDevice:inputDevice error:&error];
+
+    if ([self.session canAddInput:deviceInput]) {
+        [self.session addInput:deviceInput];
+    }
+    // mount feed to view.
+    AVCaptureVideoPreviewLayer *previewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:self.session];
+    [previewLayer setVideoGravity:AVLayerVideoGravityResizeAspectFill];
+    CALayer *rootLayer = [[self view] layer];
+    [rootLayer setMasksToBounds:YES];
+    CGRect frame = self.inputImageView.frame;
+    [previewLayer setFrame:frame];
+    [rootLayer insertSublayer:previewLayer atIndex:0];
+
+    self.stillImageInput = [[AVCaptureStillImageOutput alloc] init];
+    NSDictionary *outputSettings = [[NSDictionary alloc] initWithObjectsAndKeys:AVVideoCodecTypeJPEG, AVVideoCodecKey, nil];
+    [self.stillImageInput setOutputSettings:outputSettings];
+    [self.session addOutput:self.stillImageInput];
+}
+
+- (IBAction)handleActionForToggleVideoCaptureSwitch:(id)sender {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (self.toggleVideoCapture.isOn) {
+            if (!self.session) {
+                [self setupCameraSession];
+            }
+            //    dispatch_async(dispatch_get_main_queue(), ^{
+            //    });
+            [self.session startRunning];
+            
+            self.timer = [NSTimer scheduledTimerWithTimeInterval:1.0/self.framerate.value  target:self selector:@selector(takePhoto) userInfo:nil repeats:YES];
+//            while (self.toggleVideoCapture.isOn) {
+//                dispatch_async(dispatch_get_main_queue(), ^{
+//                    [NSThread sleepForTimeInterval:0.1f];
+//                    [self takePhoto];
+//                });
+//            }
+        }
+        else {
+            [self.timer invalidate];
+            [self.session stopRunning];
+        }
+    });
+}
+
+- (void) takePhoto {
+    AVCaptureConnection *videoConnection = nil;
+    // isolate for video connection.
+    for (AVCaptureConnection *connection in self.stillImageInput.connections) {
+        for (AVCaptureInputPort *port in [connection inputPorts]) {
+            if ([[port mediaType] isEqual:AVMediaTypeVideo]) {
+                videoConnection = connection;
+                break;
+            }
+        }
+        if (videoConnection) {
+            break;
+        }
+    }
+    [self.stillImageInput captureStillImageAsynchronouslyFromConnection:videoConnection
+      completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error) {
+      if (imageDataSampleBuffer != NULL) {
+          NSData *imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
+          UIImage *tmp = [UIImage imageWithData:imageData];
+          [self predictDepthMapFromInputImage:tmp];
+      }
+  }];
+}
+
+
+#pragma mark - Status label + other labels
 
 - (void)updateStatusLabelText:(NSString*)text {
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -107,6 +208,17 @@
     });
 }
 
+- (void)updateFPSDepthText:(NSString*)text {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.fpsDepth.text = text;
+    });
+}
+
+- (void)updateFPSClassifyText:(NSString*)text {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.fpsDepth.text = text;
+    });
+}
 #pragma mark - Button action handlers
 
 - (IBAction)handleActionForImageOpenButton:(id)sender {
@@ -178,12 +290,13 @@
 - (void)predictDepthMapFromInputImage:(UIImage*)inputImage {
     NSError *error = nil;
     
+    // TODO: Generalize function here.
     VNRequestCompletionHandler completionHandler =  ^(VNRequest *request, NSError * _Nullable error) {
-         dispatch_async(dispatch_get_main_queue(), ^{
-            // self.textView.stringValue = NSLocalizedString(@"depthPrediction.completionHandler", @"Processing results...");
-             NSLog(@"Processing results...");
-             [self updateStatusLabelText:@"Processing results..."];
-         });
+//         dispatch_async(dispatch_get_main_queue(), ^{
+//            // self.textView.stringValue = NSLocalizedString(@"depthPrediction.completionHandler", @"Processing results...");
+//             NSLog(@"Processing results...");
+//             [self updateStatusLabelText:@"Processing results..."];
+//         });
         NSArray *results = request.results;
         NSLog(@"results = \"%@\"", results);
         for (VNObservation *observation in results) {
@@ -206,21 +319,9 @@
                                                                             sizeY:sizeY];
                     
                     dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
-                    self.disparityImage = [self.imagePlatform createDisperityDepthImage];
-                    //self.depthImage =  [self.imagePlatform createBGRADepthImage];
-                                                            
-                    CGRect inputImageCropRect = [self.imagePlatform cropRectFromImageSize:inputImage.size
-                                                                   withSizeForAspectRatio:self.disparityImage.size];
-                    
-                    UIImage *croppedImage  = [self.imagePlatform cropImage:inputImage
-                                                              withCropRect:inputImageCropRect];
-                    self.croppedInputImage = croppedImage;
-                    
-                    self.combinedImageData =  [self.imagePlatform addDepthMapToExistingImage:croppedImage];
-                        
-                    self.depthHistogramImage = [self.imagePlatform depthHistogram];
-                        
-                    [self didPrepareImages];
+                        self.disparityImage = [self.imagePlatform createDisperityDepthImage];
+                        //self.depthImage =  [self.imagePlatform createBGRADepthImage];
+                        [self didPrepareImages];
                     });
                 }
             }
@@ -234,7 +335,24 @@
                                                           options:@{VNImageOptionCIContext : self.imagePlatform.imagePlatformCoreContext}];
     //[self.handler performRequests:self.request];
     [self updateStatusLabelText:@"Predicting depth map..."];
+    
+    NSDate *start = [NSDate date];
     [self.handler performRequests:@[self.request] error:&error];
+    
+    [self updateFPSDepthText:[NSString stringWithFormat:@"Depth FPS: %.2f", -1.0/[start timeIntervalSinceNow]]];
+    
+    
+    // object classification:
+    
+    
+//    [self updateStatusLabelText:@"Predicting object classification..."];
+//
+//    start = [NSDate date];
+//    [self.handler performRequests:@[self.request] error:&error];
+
+    
+//    [self updateFPSClassifyText:[NSString stringWithFormat:@"Depth FPS: %.2f", 1.0/[start timeIntervalSinceNow]]];
+
 }
 
 - (void)didFinish {
@@ -252,7 +370,7 @@
         //self.textView.stringValue = NSLocalizedString(@"depthPrediction.didPrepareImages", @"Images are ready");
         NSLog(@"Images are ready");
         [self updateStatusLabelText:@"Images are ready"];
-        
+#ifdef DEBUG_0
         [PHPhotoLibrary requestAuthorization:^( PHAuthorizationStatus status ) {
             if ( status == PHAuthorizationStatusAuthorized ) {
                 [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
@@ -283,16 +401,17 @@
                 [self didFinish];
             }
         }];
-                    
+#endif
         if (self.disparityImage) {
             [self.disparityImageImageView setContentMode:UIViewContentModeScaleAspectFit];
             [self.disparityImageImageView setImage:self.disparityImage];
+            self.disparityImageImageView.transform = CGAffineTransformMakeRotation(M_PI_2);
             [self.depthImageSaveButton setEnabled:YES];
         }
         
-        if (self.croppedInputImage) {
-            [self.croppedInputImageView setContentMode:UIViewContentModeScaleAspectFit];
-            [self.croppedInputImageView setImage:self.croppedInputImage];
+        if (self.classifiedImage) {
+            [self.classifiedImageView setContentMode:UIViewContentModeScaleAspectFit];
+            [self.classifiedImageView setImage:self.classifiedImage];
         }
         
         if (self.depthHistogramImage) {
