@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import "Prediction.h"
 
 @import Photos;
 
@@ -16,7 +17,7 @@
 //ML_MODEL_CLASS_NAME_STRING=@\"$(ML_MODEL_CLASS_NAME)\"
 
 #import ML_MODEL_CLASS_HEADER_STRING
-//#import ML_MODEL_OBJ_HEADER_STRING
+#import ML_MODEL_OBJ_HEADER_STRING
 #import "ImagePlatform.h"
 
 @import CoreML;
@@ -29,7 +30,7 @@
 @interface ViewController ()  <UINavigationControllerDelegate, UIImagePickerControllerDelegate>
 
 @property (nonatomic, strong) ML_MODEL_CLASS *fcrn;
-//@property (nonatomic, strong) ML_MODEL_OBJ *yolov3;
+@property (nonatomic, strong) ML_MODEL_OBJ *yolov3;
 
 @property (nonatomic, strong) VNCoreMLModel *model;
 @property (nonatomic, strong) VNCoreMLModel *model2;
@@ -91,14 +92,23 @@
 
 - (void)loadModel {
     NSError *error = nil;
+   
     self.fcrn = [[ML_MODEL_CLASS alloc] init];
-//    self.yolov3 = [[ML_MODEL_OBJ alloc] init];
+    MLModelConfiguration *config = self.fcrn.model.configuration;
+    config.allowLowPrecisionAccumulationOnGPU = true;
+    config.computeUnits = MLComputeUnitsAll;
     
     self.model = [VNCoreMLModel modelForMLModel:self.fcrn.model error:&error];
-//    self.model2 = [VNCoreMLModel modelForMLModel:self.yolov3.model error:&error];
+    
+    self.yolov3 = [[ML_MODEL_OBJ alloc] init];
+    config = self.yolov3.model.configuration;
+    config.allowLowPrecisionAccumulationOnGPU = true;
+    config.computeUnits = MLComputeUnitsAll;
+    
+    self.model2 = [VNCoreMLModel modelForMLModel:self.yolov3.model error:&error];
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (self.model != nil /*&& self.model2 != nil*/) {
+        if (self.model != nil && self.model2 != nil) {
             [self didLoadModel];
         } else {
             [self didFailToLoadModelWithError:error];
@@ -109,8 +119,8 @@
 
 - (void)didLoadModel {
     //self.textView.stringValue = NSLocalizedString(@"depthPrediction.readyToOpen", @"Please open an image");
-    NSLog(@"didLoadModel (\"%@\")", ML_MODEL_CLASS_NAME_STRING);
-    [self updateStatusLabelText:[NSString stringWithFormat:@"didLoadModel (\"%@\")", ML_MODEL_CLASS_NAME_STRING]];
+    NSLog(@"didLoadModel (\"%@\") & (\"%@\")", ML_MODEL_CLASS_NAME_STRING, ML_MODEL_OBJ_NAME_STRING);
+    [self updateStatusLabelText:[NSString stringWithFormat:@"didLoadModel (\"%@\") & (\"%@\")", ML_MODEL_CLASS_NAME_STRING, ML_MODEL_OBJ_NAME_STRING]];
     
 }
 
@@ -158,15 +168,10 @@
             }
             //    dispatch_async(dispatch_get_main_queue(), ^{
             //    });
+            // NOTE: this doesn't work when being called on a separate thread.
             [self.session startRunning];
             
             self.timer = [NSTimer scheduledTimerWithTimeInterval:1.0/self.framerate.value  target:self selector:@selector(takePhoto) userInfo:nil repeats:YES];
-//            while (self.toggleVideoCapture.isOn) {
-//                dispatch_async(dispatch_get_main_queue(), ^{
-//                    [NSThread sleepForTimeInterval:0.1f];
-//                    [self takePhoto];
-//                });
-//            }
         }
         else {
             [self.timer invalidate];
@@ -194,6 +199,7 @@
       if (imageDataSampleBuffer != NULL) {
           NSData *imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
           UIImage *tmp = [UIImage imageWithData:imageData];
+          [self classifyObjectsFromInputImage:tmp];
           [self predictDepthMapFromInputImage:tmp];
       }
   }];
@@ -216,7 +222,7 @@
 
 - (void)updateFPSClassifyText:(NSString*)text {
     dispatch_async(dispatch_get_main_queue(), ^{
-        self.fpsDepth.text = text;
+        self.fpsClassify.text = text;
     });
 }
 #pragma mark - Button action handlers
@@ -244,26 +250,27 @@
 }
 
 #pragma mark - UIImagePickerControllerDelegate
-
+// NOTE: unused.
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<UIImagePickerControllerInfoKey, id> *)info {
     dispatch_async(dispatch_get_main_queue(), ^{
         UIImage *inputImage = [info objectForKey:UIImagePickerControllerEditedImage];
         if (inputImage == nil) {
             inputImage = [info objectForKey:UIImagePickerControllerOriginalImage];
         }
-        
+
         self.mediaType = [info objectForKey:UIImagePickerControllerMediaType];
         if (inputImage) {
             self.inputImageView.image = inputImage;
             [self dismissViewControllerAnimated:YES completion:^{
                 self.imageOpenButton.enabled = NO;
                 self.depthImageSaveButton.enabled = NO;
+
                [self predictDepthMapFromInputImage:inputImage];
             }];
-            
+
         }
-        
-        
+
+
        });
 }
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
@@ -284,13 +291,77 @@
 }
 
 
-#pragma mark - Depth prediction
+#pragma mark - Image Classification + Depth prediction
 
+// from https://stackoverflow.com/questions/59306701/coreml-and-yolov3-performance-issue
+- (void)classifyObjectsFromInputImage:(UIImage*)inputImage {
+    NSError *error = nil;
+    float threshold = 0.8; // label objects only with 0.8+ accuracy.
+    NSMutableArray<Prediction*> *predictions = [[NSMutableArray alloc] init];
+    
+    // Sort classification labels by highest confidence first:
+    NSSortDescriptor *sd = [[NSSortDescriptor alloc] initWithKey:@"confidence" ascending:NO];
+
+
+    VNRequestCompletionHandler completionHandler =  ^(VNRequest *request, NSError * _Nullable error) {
+//         dispatch_async(dispatch_get_main_queue(), ^{
+//            // self.textView.stringValue = NSLocalizedString(@"depthPrediction.completionHandler", @"Processing results...");
+//             NSLog(@"Processing results...");
+//             [self updateStatusLabelText:@"Processing results..."];
+//         });
+        
+        NSArray *results = request.results;
+        NSLog(@"results = \"%@\"", results);
+        for (VNObservation *observation in results) {
+            if([observation isKindOfClass:[VNRecognizedObjectObservation class]] && observation.confidence > threshold){ // Detected an object in the first place with confidence x.
+                VNRecognizedObjectObservation *obs = (VNRecognizedObjectObservation *) observation;
+                CGRect rect = obs.boundingBox;
+                
+                NSArray<VNClassificationObservation *> *labels = obs.labels;
+                VNClassificationObservation *bestLabel = [labels sortedArrayUsingDescriptors:@[sd]][0];
+                
+                Prediction* prediction = [Prediction alloc];
+                prediction.Label = bestLabel.identifier;
+                prediction.Confidence = bestLabel.confidence;
+                prediction.BBox = rect;
+
+                [predictions addObject:prediction];
+            }
+        }
+    };
+    
+    
+    self.request = [[VNCoreMLRequest alloc] initWithModel:self.model2 completionHandler:completionHandler];
+    CGImageRef imageRef = [inputImage asCGImageRef];
+    
+    // NOTE: unsure about options field:
+    self.handler = [[VNImageRequestHandler alloc] initWithCGImage: imageRef
+                                                          options:@{VNImageOptionCIContext : self.imagePlatform.imagePlatformCoreContext}];
+    
+    // object classification:
+    [self updateStatusLabelText:@"Predicting object classification..."];
+
+    NSDate *start = [NSDate date];
+    [self.handler performRequests:@[self.request] error:&error];
+
+    
+    [self updateFPSClassifyText:[NSString stringWithFormat:@"Classify FPS: %.2f", -1.0/[start timeIntervalSinceNow]]];
+    
+    // draw bounding boxes
+//    for(Prediction *prediction in predictions){
+//        CGRect rect = [prediction BBox];
+//        cv::rectangle(frame,cv::Point(rect.origin.x * width,(1 - rect.origin.y) * height),
+//                      cv::Point((rect.origin.x + rect.size.width) * width, (1 - (rect.origin.y + rect.size.height)) * height),
+//                      cv::Scalar(0,255,0), 1,8,0);
+//    }
+
+    [predictions removeAllObjects];
+}
+    
 
 - (void)predictDepthMapFromInputImage:(UIImage*)inputImage {
     NSError *error = nil;
-    
-    // TODO: Generalize function here.
+
     VNRequestCompletionHandler completionHandler =  ^(VNRequest *request, NSError * _Nullable error) {
 //         dispatch_async(dispatch_get_main_queue(), ^{
 //            // self.textView.stringValue = NSLocalizedString(@"depthPrediction.completionHandler", @"Processing results...");
@@ -298,7 +369,7 @@
 //             [self updateStatusLabelText:@"Processing results..."];
 //         });
         NSArray *results = request.results;
-        NSLog(@"results = \"%@\"", results);
+//        NSLog(@"results = \"%@\"", results);
         for (VNObservation *observation in results) {
             if ([observation isKindOfClass:[VNCoreMLFeatureValueObservation class]]) {
                 VNCoreMLFeatureValueObservation *featureValueObservation = (VNCoreMLFeatureValueObservation*)observation;
@@ -340,19 +411,6 @@
     [self.handler performRequests:@[self.request] error:&error];
     
     [self updateFPSDepthText:[NSString stringWithFormat:@"Depth FPS: %.2f", -1.0/[start timeIntervalSinceNow]]];
-    
-    
-    // object classification:
-    
-    
-//    [self updateStatusLabelText:@"Predicting object classification..."];
-//
-//    start = [NSDate date];
-//    [self.handler performRequests:@[self.request] error:&error];
-
-    
-//    [self updateFPSClassifyText:[NSString stringWithFormat:@"Depth FPS: %.2f", 1.0/[start timeIntervalSinceNow]]];
-
 }
 
 - (void)didFinish {
@@ -370,38 +428,7 @@
         //self.textView.stringValue = NSLocalizedString(@"depthPrediction.didPrepareImages", @"Images are ready");
         NSLog(@"Images are ready");
         [self updateStatusLabelText:@"Images are ready"];
-#ifdef DEBUG_0
-        [PHPhotoLibrary requestAuthorization:^( PHAuthorizationStatus status ) {
-            if ( status == PHAuthorizationStatusAuthorized ) {
-                [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
-                   
-                    if (self.combinedImageData) {
-                        NSLog(@"Combined image data is available");
-                        [self updateStatusLabelText:@"Portrait image data is available"];
-                        PHAssetResourceCreationOptions* options = [[PHAssetResourceCreationOptions alloc] init];
-                        options.uniformTypeIdentifier =  self.mediaType;
-                        PHAssetCreationRequest* creationRequest = [PHAssetCreationRequest creationRequestForAsset];
-                        [creationRequest addResourceWithType:PHAssetResourceTypePhoto data:self.combinedImageData options:options];
-                    }
-                    
-                } completionHandler:^( BOOL success, NSError* _Nullable error ) {
-                    if ( ! success ) {
-                        NSLog( @"Error occurred while saving photo to photo library: %@", error );
-                        [self updateStatusLabelText:[NSString stringWithFormat:@"Error occurred while saving photo to photo library: %@", error.localizedDescription]];
-                    } else {
-                        [self updateStatusLabelText:@"Cropped portrait image was saved to gallery"];
-                    }
-                    
-                    [self didFinish];
-                }];
-            }
-            else {
-                NSLog(@"Not authorized to save photo" );
-                [self updateStatusLabelText:@"Not authorized to save photo"];
-                [self didFinish];
-            }
-        }];
-#endif
+
         if (self.disparityImage) {
             [self.disparityImageImageView setContentMode:UIViewContentModeScaleAspectFit];
             [self.disparityImageImageView setImage:self.disparityImage];

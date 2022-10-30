@@ -8,7 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ViewController : UIViewController
+@interface Prediction : NSObject
 
+@property NSString *Label;
+@property float Confidence;
+@property CGRect BBox;
 
 @end

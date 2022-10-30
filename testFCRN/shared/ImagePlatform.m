@@ -357,14 +357,20 @@ typedef struct _sImagePlatformContext {
         _context.spBuffSize = sizeX * sizeY * sizeof(float);
         _context.spBuff = malloc(_context.spBuffSize);
     }
-    
+    /**
+     
+      scale = 1.0 / (max + (min / 2))
+            max + min / 2 = 1 / scale
+     
+     */
+    // Likely scales image buffer for depth perception. Stored as 1D array.
     double maxVD = 0.;
     vDSP_maxvD((const double *)pData, 1, &maxVD, sizeY*sizeX);
     double minVD = 0.;
     vDSP_minvD((const double *)pData, 1, &minVD, sizeY*sizeX);
-    const  double scalar = (1.0 / (maxVD+(minVD/2.0)));
-    vDSP_vsmulD((const double *)pData, 1, &scalar, (double *)_context.pData, 1, sizeY*sizeX);
-    vDSP_vdpsp((const double *)_context.pData,1, (float*)_context.spBuff, 1,  sizeY*sizeX);
+    const  double scalar = (1.0 / (maxVD+(minVD/2.0))); // ???
+    vDSP_vsmulD((const double *)pData, 1, &scalar, (double *)_context.pData, 1, sizeY*sizeX); // multiply vector by scalar.
+    vDSP_vdpsp((const double *)_context.pData,1, (float*)_context.spBuff, 1,  sizeY*sizeX); // double to float precision.
     
     float maxV = 0.;
     float minV = 0.;
@@ -459,7 +465,7 @@ typedef struct _sImagePlatformContext {
     
     return auxDict;
 }
-
+// NOTE: don't need unless want to integrate depth map directlty with image.
 - (NSData*)addDepthMapToExistingImage:(IMAGE_TYPE*)existingImage {
     NSData *combinedImageData = NULL;
     

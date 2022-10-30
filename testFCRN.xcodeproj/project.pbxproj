@@ -11,8 +11,8 @@
 		DFDBB31F28FE37200081FB08 /* YOLOv3FP16.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = DFDBB31C28FE37200081FB08 /* YOLOv3FP16.mlmodel */; };
 		DFDBB32028FE37200081FB08 /* YOLOv3Int8LUT.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = DFDBB31D28FE37200081FB08 /* YOLOv3Int8LUT.mlmodel */; };
 		DFDBB32128FE37200081FB08 /* YOLOv3Int8LUT.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = DFDBB31D28FE37200081FB08 /* YOLOv3Int8LUT.mlmodel */; };
-		E8201F5222EF1B7D0098B7DB /* FCRNFP16.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = E8201F4922EF1A250098B7DB /* FCRNFP16.mlmodel */; };
-		E8201F5322EF1B800098B7DB /* FCRN.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = E8201F4722EF1A1D0098B7DB /* FCRN.mlmodel */; };
+		DFEBCEAE290E07B60027B013 /* Prediction.m in Sources */ = {isa = PBXBuildFile; fileRef = DFEBCEAD290E07B60027B013 /* Prediction.m */; };
+		DFEBCEAF290E07B60027B013 /* Prediction.m in Sources */ = {isa = PBXBuildFile; fileRef = DFEBCEAD290E07B60027B013 /* Prediction.m */; };
 		E85B07AF2312C5950047D978 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E85B07AE2312C5950047D978 /* AppDelegate.m */; };
 		E85B07B22312C5950047D978 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E85B07B12312C5950047D978 /* SceneDelegate.m */; };
 		E85B07B52312C5950047D978 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E85B07B42312C5950047D978 /* ViewController.m */; };
@@ -37,19 +37,13 @@
 		E85B07DB2312CBD80047D978 /* Matte.xmp in Resources */ = {isa = PBXBuildFile; fileRef = E87F8F8922FC735C00E48DB8 /* Matte.xmp */; };
 		E85B07DC2312CBDA0047D978 /* DepthLandscape.xmp in Resources */ = {isa = PBXBuildFile; fileRef = E87F8F8A22FC735C00E48DB8 /* DepthLandscape.xmp */; };
 		E85B07DD2312CBDB0047D978 /* DepthLandscape.xmp in Resources */ = {isa = PBXBuildFile; fileRef = E87F8F8A22FC735C00E48DB8 /* DepthLandscape.xmp */; };
-		E87F8F8B22FC735D00E48DB8 /* DepthPortrait.xmp in Resources */ = {isa = PBXBuildFile; fileRef = E87F8F8822FC735C00E48DB8 /* DepthPortrait.xmp */; };
-		E87F8F8C22FC735D00E48DB8 /* DepthPortrait.xmp in Resources */ = {isa = PBXBuildFile; fileRef = E87F8F8822FC735C00E48DB8 /* DepthPortrait.xmp */; };
-		E87F8F8D22FC735D00E48DB8 /* Matte.xmp in Resources */ = {isa = PBXBuildFile; fileRef = E87F8F8922FC735C00E48DB8 /* Matte.xmp */; };
-		E87F8F8E22FC735D00E48DB8 /* Matte.xmp in Resources */ = {isa = PBXBuildFile; fileRef = E87F8F8922FC735C00E48DB8 /* Matte.xmp */; };
-		E87F8F8F22FC735D00E48DB8 /* DepthLandscape.xmp in Resources */ = {isa = PBXBuildFile; fileRef = E87F8F8A22FC735C00E48DB8 /* DepthLandscape.xmp */; };
-		E87F8F9022FC735D00E48DB8 /* DepthLandscape.xmp in Resources */ = {isa = PBXBuildFile; fileRef = E87F8F8A22FC735C00E48DB8 /* DepthLandscape.xmp */; };
-		E896783222EF013D002D34D2 /* ImagePlatform.m in Sources */ = {isa = PBXBuildFile; fileRef = E8A7368522ED7D6B00309FD0 /* ImagePlatform.m */; };
-		E8A7368622ED7D6B00309FD0 /* ImagePlatform.m in Sources */ = {isa = PBXBuildFile; fileRef = E8A7368522ED7D6B00309FD0 /* ImagePlatform.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		DFDBB31C28FE37200081FB08 /* YOLOv3FP16.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = YOLOv3FP16.mlmodel; sourceTree = "<group>"; };
 		DFDBB31D28FE37200081FB08 /* YOLOv3Int8LUT.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = YOLOv3Int8LUT.mlmodel; sourceTree = "<group>"; };
+		DFEBCEA9290E06C80027B013 /* Prediction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Prediction.h; sourceTree = "<group>"; };
+		DFEBCEAD290E07B60027B013 /* Prediction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Prediction.m; sourceTree = "<group>"; };
 		E8201F4722EF1A1D0098B7DB /* FCRN.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = FCRN.mlmodel; sourceTree = "<group>"; };
 		E8201F4922EF1A250098B7DB /* FCRNFP16.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = FCRNFP16.mlmodel; sourceTree = "<group>"; };
 		E85B07AB2312C5950047D978 /* testFCRN16-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "testFCRN16-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -68,8 +62,6 @@
 		E87F8F8822FC735C00E48DB8 /* DepthPortrait.xmp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DepthPortrait.xmp; sourceTree = "<group>"; };
 		E87F8F8922FC735C00E48DB8 /* Matte.xmp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Matte.xmp; sourceTree = "<group>"; };
 		E87F8F8A22FC735C00E48DB8 /* DepthLandscape.xmp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DepthLandscape.xmp; sourceTree = "<group>"; };
-		E896783D22EF013D002D34D2 /* testFCRN16.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testFCRN16.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		E8A7365A22ED7BE400309FD0 /* testFCRN32.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testFCRN32.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8A7368422ED7D6B00309FD0 /* ImagePlatform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ImagePlatform.h; sourceTree = "<group>"; };
 		E8A7368522ED7D6B00309FD0 /* ImagePlatform.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ImagePlatform.m; sourceTree = "<group>"; };
 		E8A7368722ED7DB600309FD0 /* TargetPlatform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TargetPlatform.h; sourceTree = "<group>"; };
@@ -84,20 +76,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		E85B07CA2312C6200047D978 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E896783622EF013D002D34D2 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E8A7365722ED7BE300309FD0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -139,6 +117,8 @@
 				E85B07B12312C5950047D978 /* SceneDelegate.m */,
 				E85B07B32312C5950047D978 /* ViewController.h */,
 				E85B07B42312C5950047D978 /* ViewController.m */,
+				DFEBCEAD290E07B60027B013 /* Prediction.m */,
+				DFEBCEA9290E06C80027B013 /* Prediction.h */,
 				E85B07B62312C5950047D978 /* Main.storyboard */,
 				E85B07B92312C5970047D978 /* Assets.xcassets */,
 				E85B07BB2312C5970047D978 /* LaunchScreen.storyboard */,
@@ -169,8 +149,6 @@
 		E8A7365B22ED7BE400309FD0 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				E8A7365A22ED7BE400309FD0 /* testFCRN32.app */,
-				E896783D22EF013D002D34D2 /* testFCRN16.app */,
 				E85B07AB2312C5950047D978 /* testFCRN16-iOS.app */,
 				E85B07D22312C6200047D978 /* testFCRN32-iOS.app */,
 			);
@@ -224,40 +202,6 @@
 			productReference = E85B07D22312C6200047D978 /* testFCRN32-iOS.app */;
 			productType = "com.apple.product-type.application";
 		};
-		E896782F22EF013D002D34D2 /* testFCRN16 */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = E896783A22EF013D002D34D2 /* Build configuration list for PBXNativeTarget "testFCRN16" */;
-			buildPhases = (
-				E896783022EF013D002D34D2 /* Sources */,
-				E896783622EF013D002D34D2 /* Frameworks */,
-				E896783722EF013D002D34D2 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = testFCRN16;
-			productName = testFCRN;
-			productReference = E896783D22EF013D002D34D2 /* testFCRN16.app */;
-			productType = "com.apple.product-type.application";
-		};
-		E8A7365922ED7BE300309FD0 /* testFCRN32 */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = E8A7366E22ED7BE500309FD0 /* Build configuration list for PBXNativeTarget "testFCRN32" */;
-			buildPhases = (
-				E8A7365622ED7BE300309FD0 /* Sources */,
-				E8A7365722ED7BE300309FD0 /* Frameworks */,
-				E8A7365822ED7BE300309FD0 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = testFCRN32;
-			productName = testFCRN;
-			productReference = E8A7365A22ED7BE400309FD0 /* testFCRN32.app */;
-			productType = "com.apple.product-type.application";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -268,9 +212,6 @@
 				ORGANIZATIONNAME = "Doron Adler";
 				TargetAttributes = {
 					E85B07AA2312C5950047D978 = {
-						CreatedOnToolsVersion = 11.0;
-					};
-					E8A7365922ED7BE300309FD0 = {
 						CreatedOnToolsVersion = 11.0;
 					};
 				};
@@ -288,8 +229,6 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				E8A7365922ED7BE300309FD0 /* testFCRN32 */,
-				E896782F22EF013D002D34D2 /* testFCRN16 */,
 				E85B07AA2312C5950047D978 /* testFCRN16-iOS */,
 				E85B07C42312C6200047D978 /* testFCRN32-iOS */,
 			);
@@ -323,26 +262,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E896783722EF013D002D34D2 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				E87F8F8E22FC735D00E48DB8 /* Matte.xmp in Resources */,
-				E87F8F8C22FC735D00E48DB8 /* DepthPortrait.xmp in Resources */,
-				E87F8F9022FC735D00E48DB8 /* DepthLandscape.xmp in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E8A7365822ED7BE300309FD0 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				E87F8F8D22FC735D00E48DB8 /* Matte.xmp in Resources */,
-				E87F8F8B22FC735D00E48DB8 /* DepthPortrait.xmp in Resources */,
-				E87F8F8F22FC735D00E48DB8 /* DepthLandscape.xmp in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -351,6 +270,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E85B07D62312CBA00047D978 /* ImagePlatform.m in Sources */,
+				DFEBCEAE290E07B60027B013 /* Prediction.m in Sources */,
 				DFDBB32028FE37200081FB08 /* YOLOv3Int8LUT.mlmodel in Sources */,
 				E85B07B52312C5950047D978 /* ViewController.m in Sources */,
 				E85B07AF2312C5950047D978 /* AppDelegate.m in Sources */,
@@ -366,6 +286,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E85B07D72312CBA10047D978 /* ImagePlatform.m in Sources */,
+				DFEBCEAF290E07B60027B013 /* Prediction.m in Sources */,
 				DFDBB32128FE37200081FB08 /* YOLOv3Int8LUT.mlmodel in Sources */,
 				E85B07C62312C6200047D978 /* ViewController.m in Sources */,
 				E85B07D52312CB970047D978 /* FCRN.mlmodel in Sources */,
@@ -373,24 +294,6 @@
 				DFDBB31F28FE37200081FB08 /* YOLOv3FP16.mlmodel in Sources */,
 				E85B07C82312C6200047D978 /* main.m in Sources */,
 				E85B07C92312C6200047D978 /* SceneDelegate.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E896783022EF013D002D34D2 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				E896783222EF013D002D34D2 /* ImagePlatform.m in Sources */,
-				E8201F5222EF1B7D0098B7DB /* FCRNFP16.mlmodel in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E8A7365622ED7BE300309FD0 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				E8201F5322EF1B800098B7DB /* FCRN.mlmodel in Sources */,
-				E8A7368622ED7D6B00309FD0 /* ImagePlatform.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -517,52 +420,6 @@
 			};
 			name = Release;
 		};
-		E896783B22EF013D002D34D2 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = testFCRN/macOS/testFCRN.entitlements;
-				CODE_SIGN_IDENTITY = "-";
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 79HFG57L33;
-				ENABLE_HARDENED_RUNTIME = YES;
-				INFOPLIST_FILE = testFCRN/macOS/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 10.13.2;
-				ML_MODEL_CLASS_NAME = FCRNFP16;
-				PRODUCT_BUNDLE_IDENTIFIER = tech.dadler.testFCRN;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Debug;
-		};
-		E896783C22EF013D002D34D2 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = testFCRN/macOS/testFCRN.entitlements;
-				CODE_SIGN_IDENTITY = "-";
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 79HFG57L33;
-				ENABLE_HARDENED_RUNTIME = YES;
-				INFOPLIST_FILE = testFCRN/macOS/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 10.13.2;
-				ML_MODEL_CLASS_NAME = FCRNFP16;
-				PRODUCT_BUNDLE_IDENTIFIER = tech.dadler.testFCRN;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Release;
-		};
 		E8A7366C22ED7BE500309FD0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -611,6 +468,9 @@
 					"ML_MODEL_CLASS_HEADER_STRING=\\\"$(ML_MODEL_CLASS_NAME).h\\\"",
 					"ML_MODEL_CLASS_NAME_STRING=@\\\"$(ML_MODEL_CLASS_NAME)\\\"",
 					"ML_MODEL_CLASS=$(ML_MODEL_CLASS_NAME)",
+					"ML_MODEL_OBJ=$(ML_MODEL_OBJ_NAME)",
+					"ML_MODEL_OBJ_NAME_STRING=@\\\"$(ML_MODEL_OBJ_NAME)\\\"",
+					"ML_MODEL_OBJ_HEADER_STRING=\\\"$(ML_MODEL_OBJ_NAME).h\\\"",
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -687,52 +547,6 @@
 			};
 			name = Release;
 		};
-		E8A7366F22ED7BE500309FD0 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = testFCRN/macOS/testFCRN.entitlements;
-				CODE_SIGN_IDENTITY = "-";
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 79HFG57L33;
-				ENABLE_HARDENED_RUNTIME = YES;
-				INFOPLIST_FILE = testFCRN/macOS/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 10.13.2;
-				ML_MODEL_CLASS_NAME = FCRN;
-				PRODUCT_BUNDLE_IDENTIFIER = tech.dadler.testFCRN;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Debug;
-		};
-		E8A7367022ED7BE500309FD0 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = testFCRN/macOS/testFCRN.entitlements;
-				CODE_SIGN_IDENTITY = "-";
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 79HFG57L33;
-				ENABLE_HARDENED_RUNTIME = YES;
-				INFOPLIST_FILE = testFCRN/macOS/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 10.13.2;
-				ML_MODEL_CLASS_NAME = FCRN;
-				PRODUCT_BUNDLE_IDENTIFIER = tech.dadler.testFCRN;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -754,29 +568,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E896783A22EF013D002D34D2 /* Build configuration list for PBXNativeTarget "testFCRN16" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				E896783B22EF013D002D34D2 /* Debug */,
-				E896783C22EF013D002D34D2 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		E8A7365522ED7BE300309FD0 /* Build configuration list for PBXProject "testFCRN" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				E8A7366C22ED7BE500309FD0 /* Debug */,
 				E8A7366D22ED7BE500309FD0 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		E8A7366E22ED7BE500309FD0 /* Build configuration list for PBXNativeTarget "testFCRN32" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				E8A7366F22ED7BE500309FD0 /* Debug */,
-				E8A7367022ED7BE500309FD0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
