@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		DFDBB31E28FE37200081FB08 /* YOLOv3FP16.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = DFDBB31C28FE37200081FB08 /* YOLOv3FP16.mlmodel */; };
 		DFDBB31F28FE37200081FB08 /* YOLOv3FP16.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = DFDBB31C28FE37200081FB08 /* YOLOv3FP16.mlmodel */; };
 		DFDBB32028FE37200081FB08 /* YOLOv3Int8LUT.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = DFDBB31D28FE37200081FB08 /* YOLOv3Int8LUT.mlmodel */; };
 		DFDBB32128FE37200081FB08 /* YOLOv3Int8LUT.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = DFDBB31D28FE37200081FB08 /* YOLOv3Int8LUT.mlmodel */; };
@@ -208,7 +207,7 @@
 		E8A7365222ED7BE300309FD0 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1400;
+				LastUpgradeCheck = 1420;
 				ORGANIZATIONNAME = "Doron Adler";
 				TargetAttributes = {
 					E85B07AA2312C5950047D978 = {
@@ -275,7 +274,6 @@
 				E85B07B52312C5950047D978 /* ViewController.m in Sources */,
 				E85B07AF2312C5950047D978 /* AppDelegate.m in Sources */,
 				E85B07C02312C5970047D978 /* main.m in Sources */,
-				DFDBB31E28FE37200081FB08 /* YOLOv3FP16.mlmodel in Sources */,
 				E85B07D42312CB930047D978 /* FCRNFP16.mlmodel in Sources */,
 				E85B07B22312C5950047D978 /* SceneDelegate.m in Sources */,
 			);
@@ -335,9 +333,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				ML_MODEL_CLASS_NAME = FCRNFP16;
 				ML_MODEL_OBJ_NAME = YOLOv3Int8LUT;
-				PRODUCT_BUNDLE_IDENTIFIER = tech.dadler.testFCRN16;
+				PRODUCT_BUNDLE_IDENTIFIER = tech.jma.testFCRN16;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -365,9 +364,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				ML_MODEL_CLASS_NAME = FCRNFP16;
 				ML_MODEL_OBJ_NAME = YOLOv3Int8LUT;
-				PRODUCT_BUNDLE_IDENTIFIER = tech.dadler.testFCRN16;
+				PRODUCT_BUNDLE_IDENTIFIER = tech.jma.testFCRN16;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -391,6 +391,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				ML_MODEL_CLASS_NAME = FCRN;
 				PRODUCT_BUNDLE_IDENTIFIER = tech.dadler.testFCRN;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -411,6 +412,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				ML_MODEL_CLASS_NAME = FCRN;
 				PRODUCT_BUNDLE_IDENTIFIER = tech.dadler.testFCRN;
 				PRODUCT_NAME = "$(TARGET_NAME)";

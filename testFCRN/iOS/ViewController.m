@@ -53,15 +53,9 @@
 @property (nonatomic, strong) UIImage *disparityImage;
 @property (nonatomic, weak) IBOutlet UIImageView *disparityImageImageView;
 
-@property (nonatomic, strong) UIImage *depthHistogramImage;
-@property (nonatomic, weak) IBOutlet UIImageView *depthHistogramImageImageView;
-
 @property (nonatomic, weak) IBOutlet UILabel *statusLabel;
 
 @property (nonatomic, strong) NSData *combinedImageData;
-
-@property (nonatomic, weak) IBOutlet UIButton *imageOpenButton;
-@property (nonatomic, weak) IBOutlet UIButton *depthImageSaveButton;
 
 @property (nonatomic, weak) IBOutlet UISwitch *toggleVideoCapture;
 @property (nonatomic, weak) IBOutlet UISlider *framerate;
@@ -81,9 +75,7 @@
     self.imagePlatform = [[ImagePlatform alloc] init];
     
     [self updateStatusLabelText:@"Loading model"];
-    self.imageOpenButton.enabled = YES;
-    self.depthImageSaveButton.enabled = NO;
-       
+    
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
         [self loadModel];
     });
@@ -225,20 +217,37 @@
         self.fpsClassify.text = text;
     });
 }
-#pragma mark - Button action handlers
 
-- (IBAction)handleActionForImageOpenButton:(id)sender {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.imageOpenButton.enabled = NO;
-        [self openImagePickerAndSelectImage];
-    });
-}
+#pragma mark - Draw Image:
 
-- (IBAction)handleActionForDepthImageSaveButton:(id)sender {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.depthImageSaveButton.enabled = NO;
-        UIImageWriteToSavedPhotosAlbum(self.disparityImage, self, @selector(image:didFinishSavingWithError:contextInfo:), nil);
-    });
+-(UIImage *)drawRectanglesOnImage:(UIImage *)img predictions:(NSMutableArray<Prediction*> *)preds{
+      CGSize imgSize = img.size;
+      CGFloat scale = 0;
+      UIGraphicsBeginImageContextWithOptions(imgSize, NO, scale);
+      [img drawAtPoint:CGPointZero];
+    
+    // Draw frames:
+      [[UIColor greenColor] setStroke];
+    
+    for (Prediction* pred in preds) {
+        // Generate new rectangle scaled:
+        CGRect scaledRect = CGRectMake(pred.BBox.origin.x * img.size.width, (1 - pred.BBox.origin.y) * img.size.height, pred.BBox.size.width * img.size.width, pred.BBox.size.height * img.size.height);
+        
+        NSMutableParagraphStyle* textStyle = NSMutableParagraphStyle.defaultParagraphStyle.mutableCopy;
+        textStyle.alignment = NSTextAlignmentLeft;
+
+        NSDictionary* textFontAttributes = @{NSFontAttributeName: [UIFont fontWithName: @"Helvetica" size: 12], NSForegroundColorAttributeName: UIColor.greenColor, NSParagraphStyleAttributeName: textStyle};
+
+        [[NSString stringWithFormat:@"%@ %0.2f %%", pred.Label, pred.Confidence * 100] drawInRect:scaledRect withAttributes:textFontAttributes];
+        
+        UIRectFrame(scaledRect);
+        
+        NSLog(@"rectCoords {x,y,width,height} = \"%@\"", NSStringFromCGRect(scaledRect));
+    }
+    
+      UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+      UIGraphicsEndImageContext();
+      return newImage;
 }
 
 #pragma mark - UIImagePickerController
@@ -248,48 +257,6 @@
     [imagePickerController setDelegate:self];
     [self showViewController:imagePickerController sender:self];
 }
-
-#pragma mark - UIImagePickerControllerDelegate
-// NOTE: unused.
-- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<UIImagePickerControllerInfoKey, id> *)info {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        UIImage *inputImage = [info objectForKey:UIImagePickerControllerEditedImage];
-        if (inputImage == nil) {
-            inputImage = [info objectForKey:UIImagePickerControllerOriginalImage];
-        }
-
-        self.mediaType = [info objectForKey:UIImagePickerControllerMediaType];
-        if (inputImage) {
-            self.inputImageView.image = inputImage;
-            [self dismissViewControllerAnimated:YES completion:^{
-                self.imageOpenButton.enabled = NO;
-                self.depthImageSaveButton.enabled = NO;
-
-               [self predictDepthMapFromInputImage:inputImage];
-            }];
-
-        }
-
-
-       });
-}
-- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
-    [self.navigationController popToRootViewControllerAnimated:YES];
-    [self dismissViewControllerAnimated:NO completion:^{
-       self.imageOpenButton.enabled = YES;
-    }];
-}
-
-// Adds a photo to the saved photos album.  The optional completionSelector should have the form:
-- (void)image:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo {
-    NSLog(@"image: %@ didFinishSavingWithError: %@ contextInfo: 0x%llx", image, error, (uint64_t)contextInfo);
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self.depthImageSaveButton setEnabled:YES];
-        NSLog(@"Depth image was saved to gallery");
-        [self updateStatusLabelText:@"Depth image was saved to gallery"];
-    });
-}
-
 
 #pragma mark - Image Classification + Depth prediction
 
@@ -311,7 +278,7 @@
 //         });
         
         NSArray *results = request.results;
-        NSLog(@"results = \"%@\"", results);
+//        NSLog(@"results = \"%@\"", results);
         for (VNObservation *observation in results) {
             if([observation isKindOfClass:[VNRecognizedObjectObservation class]] && observation.confidence > threshold){ // Detected an object in the first place with confidence x.
                 VNRecognizedObjectObservation *obs = (VNRecognizedObjectObservation *) observation;
@@ -324,10 +291,11 @@
                 prediction.Label = bestLabel.identifier;
                 prediction.Confidence = bestLabel.confidence;
                 prediction.BBox = rect;
-
+                
                 [predictions addObject:prediction];
             }
         }
+        self.classifiedImage = [self drawRectanglesOnImage:inputImage predictions:predictions];
     };
     
     
@@ -413,12 +381,6 @@
     [self updateFPSDepthText:[NSString stringWithFormat:@"Depth FPS: %.2f", -1.0/[start timeIntervalSinceNow]]];
 }
 
-- (void)didFinish {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.imageOpenButton.enabled = YES;
-    });
-}
-
 - (void)didPrepareImages {
     dispatch_async(dispatch_get_main_queue(), ^{
         
@@ -433,17 +395,13 @@
             [self.disparityImageImageView setContentMode:UIViewContentModeScaleAspectFit];
             [self.disparityImageImageView setImage:self.disparityImage];
             self.disparityImageImageView.transform = CGAffineTransformMakeRotation(M_PI_2);
-            [self.depthImageSaveButton setEnabled:YES];
         }
         
         if (self.classifiedImage) {
             [self.classifiedImageView setContentMode:UIViewContentModeScaleAspectFit];
             [self.classifiedImageView setImage:self.classifiedImage];
         }
-        
-        if (self.depthHistogramImage) {
-            [self.depthHistogramImageImageView setImage:self.depthHistogramImage];
-        }
+
         
     });
 }
