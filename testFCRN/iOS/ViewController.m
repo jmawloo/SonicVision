@@ -11,6 +11,9 @@
 
 @import Photos;
 
+
+// TODO: focus on depth perception, edge detection, wide angle camera setting.
+
 //ML_MODEL_CLASS_NAME is defined in "User defined build settings"
 //ML_MODEL_CLASS_HEADER_STRING=\"$(ML_MODEL_CLASS_NAME).h\"
 //ML_MODEL_CLASS=$(ML_MODEL_CLASS_NAME)
@@ -231,7 +234,8 @@
     
     for (Prediction* pred in preds) {
         // Generate new rectangle scaled:
-        CGRect scaledRect = CGRectMake(pred.BBox.origin.x * img.size.width, (1 - pred.BBox.origin.y) * img.size.height, pred.BBox.size.width * img.size.width, pred.BBox.size.height * img.size.height);
+        // TODO: verify that these are mapped correctly.
+        CGRect scaledRect = CGRectMake(pred.BBox.origin.x * img.size.width, pred.BBox.origin.y * img.size.height, pred.BBox.size.width * img.size.width, pred.BBox.size.height * img.size.height);
         
         NSMutableParagraphStyle* textStyle = NSMutableParagraphStyle.defaultParagraphStyle.mutableCopy;
         textStyle.alignment = NSTextAlignmentLeft;
@@ -314,14 +318,6 @@
 
     
     [self updateFPSClassifyText:[NSString stringWithFormat:@"Classify FPS: %.2f", -1.0/[start timeIntervalSinceNow]]];
-    
-    // draw bounding boxes
-//    for(Prediction *prediction in predictions){
-//        CGRect rect = [prediction BBox];
-//        cv::rectangle(frame,cv::Point(rect.origin.x * width,(1 - rect.origin.y) * height),
-//                      cv::Point((rect.origin.x + rect.size.width) * width, (1 - (rect.origin.y + rect.size.height)) * height),
-//                      cv::Scalar(0,255,0), 1,8,0);
-//    }
 
     [predictions removeAllObjects];
 }

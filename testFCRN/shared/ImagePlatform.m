@@ -361,16 +361,26 @@ typedef struct _sImagePlatformContext {
      
       scale = 1.0 / (max + (min / 2))
             max + min / 2 = 1 / scale
-     
+        Dunno y this is the design decision.
      */
     // Likely scales image buffer for depth perception. Stored as 1D array.
     double maxVD = 0.;
     vDSP_maxvD((const double *)pData, 1, &maxVD, sizeY*sizeX);
     double minVD = 0.;
     vDSP_minvD((const double *)pData, 1, &minVD, sizeY*sizeX);
-    const  double scalar = (1.0 / (maxVD+(minVD/2.0))); // ???
+    
+    NSLog(@"maxVD: %f minVD: %f", maxVD, minVD);
+    
+//    const double scalar = 1.0 / ((maxVD+minVD)/2.0); // Try midpoint formula, (maxVD+minVD)/2
+//    vDSP_vsmulD((const double *)pData, 1, &scalar, (double *)_context.pData, 1, sizeY*sizeX); // multiply vector by scalar.
+//    vDSP_vdpsp((const double *)_context.pData,1, (float*)_context.spBuff, 1,  sizeY*sizeX); // double to float precision (spBuff is output).
+    
+    const double scalar = 1.0 / (maxVD-minVD);
+    const double offset = -minVD;
+    
+    vDSP_vsaddD((const double *)_context.pData, 1, &offset, (double *)pData, 1, sizeY*sizeX);
     vDSP_vsmulD((const double *)pData, 1, &scalar, (double *)_context.pData, 1, sizeY*sizeX); // multiply vector by scalar.
-    vDSP_vdpsp((const double *)_context.pData,1, (float*)_context.spBuff, 1,  sizeY*sizeX); // double to float precision.
+    vDSP_vdpsp((const double *)_context.pData,1, (float*)_context.spBuff, 1,  sizeY*sizeX); // double to float precision (spBuff is output).
     
     float maxV = 0.;
     float minV = 0.;
