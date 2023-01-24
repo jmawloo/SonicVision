@@ -12,7 +12,8 @@
 @import Photos;
 
 
-// TODO: focus on depth perception, edge detection, wide angle camera setting.
+// TODO: focus on depth perception, (edge detection?), wide angle camera setting.
+// NOTE: Focussing on wide angle camera setting first.
 
 //ML_MODEL_CLASS_NAME is defined in "User defined build settings"
 //ML_MODEL_CLASS_HEADER_STRING=\"$(ML_MODEL_CLASS_NAME).h\"
@@ -254,14 +255,6 @@
       return newImage;
 }
 
-#pragma mark - UIImagePickerController
-
-- (void)openImagePickerAndSelectImage {
-    UIImagePickerController *imagePickerController = [[UIImagePickerController alloc] init];
-    [imagePickerController setDelegate:self];
-    [self showViewController:imagePickerController sender:self];
-}
-
 #pragma mark - Image Classification + Depth prediction
 
 // from https://stackoverflow.com/questions/59306701/coreml-and-yolov3-performance-issue
@@ -275,14 +268,9 @@
 
 
     VNRequestCompletionHandler completionHandler =  ^(VNRequest *request, NSError * _Nullable error) {
-//         dispatch_async(dispatch_get_main_queue(), ^{
-//            // self.textView.stringValue = NSLocalizedString(@"depthPrediction.completionHandler", @"Processing results...");
-//             NSLog(@"Processing results...");
-//             [self updateStatusLabelText:@"Processing results..."];
-//         });
         
         NSArray *results = request.results;
-//        NSLog(@"results = \"%@\"", results);
+
         for (VNObservation *observation in results) {
             if([observation isKindOfClass:[VNRecognizedObjectObservation class]] && observation.confidence > threshold){ // Detected an object in the first place with confidence x.
                 VNRecognizedObjectObservation *obs = (VNRecognizedObjectObservation *) observation;
@@ -327,19 +315,13 @@
     NSError *error = nil;
 
     VNRequestCompletionHandler completionHandler =  ^(VNRequest *request, NSError * _Nullable error) {
-//         dispatch_async(dispatch_get_main_queue(), ^{
-//            // self.textView.stringValue = NSLocalizedString(@"depthPrediction.completionHandler", @"Processing results...");
-//             NSLog(@"Processing results...");
-//             [self updateStatusLabelText:@"Processing results..."];
-//         });
         NSArray *results = request.results;
-//        NSLog(@"results = \"%@\"", results);
+        
         for (VNObservation *observation in results) {
             if ([observation isKindOfClass:[VNCoreMLFeatureValueObservation class]]) {
                 VNCoreMLFeatureValueObservation *featureValueObservation = (VNCoreMLFeatureValueObservation*)observation;
                 MLFeatureValue *featureValue = featureValueObservation.featureValue;
                 if (featureValue.type == MLFeatureTypeMultiArray) {
-                    //NSLog(@"featureName: \"%@\" of type \"%@\" (%@)", featureValueObservation.featureName, @"MLFeatureTypeMultiArray", @(featureValue.type));
                     MLMultiArray *multiArrayValue = featureValue.multiArrayValue;
                     MLMultiArrayDataType dataType = multiArrayValue.dataType;
                     uint8_t pixelSizeInBytes = (dataType & 0xFF) / 8;

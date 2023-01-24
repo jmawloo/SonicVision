@@ -9,6 +9,8 @@
 #import "ImagePlatform.h"
 
 #define kDepthFormat kCVPixelFormatType_DisparityFloat32
+// NOTE: uses disparity instead of depth model
+
 //#define kDepthFormat kCVPixelFormatType_DepthFloat32
 
 @import CoreImage;
@@ -18,25 +20,12 @@
 @implementation IMAGE_TYPE (ImagePlatform)
 
 - (NSData*)imageJPEGRepresentationWithCompressionFactor:(CGFloat)compressionFactor {
-#ifdef MACOS_TARGET
-    NSData *imageData = [self TIFFRepresentation];
-    NSBitmapImageRep *imageRep = [NSBitmapImageRep imageRepWithData:imageData];
-    NSDictionary *imageProps = [NSDictionary dictionaryWithObject:[NSNumber numberWithFloat:compressionFactor] forKey:NSImageCompressionFactor];
-    imageData = [imageRep representationUsingType:NSBitmapImageFileTypeJPEG properties:imageProps];
-    return imageData;
-#else
     NSData *imageJPEGRepresentation = UIImageJPEGRepresentation(self, compressionFactor);
     return imageJPEGRepresentation;
-#endif
 }
 
 - (CGImageRef)asCGImageRef {
-#ifdef MACOS_TARGET
-    CGRect proposedRect = CGRectMake(0.0f, 0.0f, self.size.width, self.size.height);
-    CGImageRef imgRef = [self CGImageForProposedRect:&proposedRect context:nil hints:nil];
-#else
     CGImageRef imgRef = self.CGImage;
-#endif
     
     return imgRef;
 }
@@ -145,15 +134,7 @@ typedef struct _sImagePlatformContext {
 
 - (CIImage *)ciImageFromPixelBuffer:(CVPixelBufferRef _Nonnull)cvPixelBufferRef
                    imageOrientation:(UIImageOrientation)imageOrientation {
-#ifdef MACOS_TARGET
-    CIImage *ciImageBeforeOrientation = nil;
-    ciImageBeforeOrientation = [CIImage imageWithCVImageBuffer:cvPixelBufferRef];
-    CGImagePropertyOrientation orientation = [self CGImagePropertyOrientationForUIImageOrientation:imageOrientation];
-    CIImage *ciImage = [ciImageBeforeOrientation imageByApplyingOrientation:orientation];
-    return ciImage;
-#else
     return ([CIImage imageWithCVImageBuffer:cvPixelBufferRef]);
-#endif
 }
 
 - (IMAGE_TYPE*)imageFromCVPixelBufferRef:(CVPixelBufferRef)cvPixelBufferRef
@@ -166,27 +147,17 @@ typedef struct _sImagePlatformContext {
                                   CVPixelBufferGetWidth(cvPixelBufferRef),
                                   CVPixelBufferGetHeight(cvPixelBufferRef));
     
+    // creates image given context and rectangular bounds.
     CGImageRef imageRef = [self.imagePlatformCoreContext
                            createCGImage:ciImage
                            fromRect:imageRect];
     
     if (imageRef) {
-#ifdef MACOS_TARGET
-        size_t imageWidth  = CGImageGetWidth(imageRef);
-        size_t imageHeight = CGImageGetHeight(imageRef);
-        NSSize imageSize = NSMakeSize((CGFloat)imageWidth, (CGFloat)imageHeight);
-        
-        
-        imageFromCVPixelBufferRef = [[IMAGE_TYPE alloc] initWithCGImage:imageRef size:imageSize] ;
-#else
         imageFromCVPixelBufferRef = [IMAGE_TYPE imageWithCGImage:imageRef scale:1.0 orientation:imageOrientation];
-#endif
-        
         CGImageRelease(imageRef);
     }
     
     return imageFromCVPixelBufferRef;
-    
 }
 
 #pragma mark - Utility - CGImagePropertyOrientation <-> UIImageOrientation convertion
@@ -242,15 +213,8 @@ typedef struct _sImagePlatformContext {
         [self teardownPixelBuffer:pPixelBufferRef];
     }
     
-#ifdef MACOS_TARGET
-    NSDictionary *pixelBufferAttributes = @{ (NSString*)kCVPixelBufferIOSurfacePropertiesKey : @{},
-                                             (NSString*)kCVPixelBufferOpenGLCompatibilityKey: @YES};
-    
-#else
     NSDictionary *pixelBufferAttributes = @{ (NSString*)kCVPixelBufferIOSurfacePropertiesKey : @{},
                                              (NSString*)kCVPixelBufferOpenGLESCompatibilityKey: @YES};
-    
-#endif
     
     CVReturn cvRet =  CVPixelBufferCreate(kCFAllocatorDefault,
                                           rect.size.width,
@@ -265,72 +229,9 @@ typedef struct _sImagePlatformContext {
         return NO;
     }
     
-    NSLog(@"Done: setupPixelBuffer: \"%@\" withRect: \"{%f, %f, %f, %f}\"", (*pPixelBufferRef), rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+    // NSLog(@"Done: setupPixelBuffer: \"%@\" withRect: \"{%f, %f, %f, %f}\"", (*pPixelBufferRef), rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
     
     return YES;
-}
-
-#pragma mark - Utility Filters
-
-- (IMAGE_TYPE*)depthHistogram {
-    NSAssert((_context.pixelSizeInBytes == 8), @"Expected double sized elements");
-    
-    CVPixelBufferRef grayImageBuffer = NULL;
-    CGRect pixelBufferRect = CGRectMake(0.0f, 0.0f, (CGFloat)(_context.sizeX), (CGFloat)(_context.sizeY));
-    BOOL didSetup = [self setupPixelBuffer:&grayImageBuffer
-                           pixelFormatType:kDepthFormat
-                                  withRect:pixelBufferRect];
-    
-    if (grayImageBuffer == NULL || didSetup == NO) {
-        return NULL;
-    }
-    
-    CVPixelBufferLockBaseAddress(grayImageBuffer, 0);
-    float *spBuff = (float *)CVPixelBufferGetBaseAddress(grayImageBuffer);
-    memcpy(spBuff, _context.spBuff, _context.spBuffSize);
-    CVPixelBufferUnlockBaseAddress(grayImageBuffer, 0);
-    
-    CIImage *ciImage = [self ciImageFromPixelBuffer:grayImageBuffer imageOrientation:UIImageOrientationUp];
-    
-    CIFilter *areaHistogramFilter = [CIFilter filterWithName:@"CIAreaHistogram"];
-    [areaHistogramFilter setValue:ciImage forKey:kCIInputImageKey];
-    
-#define kInputHeight 100
-#define kInputScale  50
-    CGRect imageExtent = [ciImage extent];
-    CIVector *extentVector = [CIVector vectorWithCGRect:imageExtent];
-    [areaHistogramFilter setValue:extentVector forKey:kCIInputExtentKey];
-    [areaHistogramFilter setValue:@(255) forKey: @"inputCount"];
-    [areaHistogramFilter setValue:@(kInputScale) forKey: kCIInputScaleKey];
-    
-    CIImage *areaHistogramImage = [areaHistogramFilter outputImage];
-    
-    CIFilter *histogramDisplayFilter = [CIFilter filterWithName:@"CIHistogramDisplayFilter"];
-    [histogramDisplayFilter setValue:areaHistogramImage forKey:kCIInputImageKey];
-    [histogramDisplayFilter setValue:@(kInputHeight)  forKey:@"inputHeight"];
-    [histogramDisplayFilter setValue:@(_context.maxV) forKey:@"inputHighLimit"];
-    [histogramDisplayFilter setValue:@(_context.minV) forKey:@"inputLowLimit"];
-    
-    
-    CIImage *histogramDisplayImage = [histogramDisplayFilter outputImage];
-    CGRect histogramDisplayImageRect = [histogramDisplayImage extent];
-    CVPixelBufferRef histogramPixelBufferRef = NULL;
-    didSetup = [self setupPixelBuffer:&histogramPixelBufferRef
-                      pixelFormatType:kCVPixelFormatType_32BGRA
-                             withRect:histogramDisplayImageRect];
-    
-    if (histogramPixelBufferRef == NULL || didSetup == NO) {
-        [self teardownPixelBuffer:&grayImageBuffer];
-        return NULL;
-    }
-    
-    [self.imagePlatformCoreContext render:histogramDisplayImage toCVPixelBuffer:histogramPixelBufferRef];
-    IMAGE_TYPE * histogramImage = [self imageFromCVPixelBufferRef:histogramPixelBufferRef imageOrientation:UIImageOrientationUp];
-    
-    [self teardownPixelBuffer:&grayImageBuffer];
-    [self teardownPixelBuffer:&histogramPixelBufferRef];
-    
-    return histogramImage;
 }
 
 #pragma mark - Depth buffer proccesing
@@ -414,6 +315,8 @@ typedef struct _sImagePlatformContext {
     CVPixelBufferUnlockBaseAddress(grayImageBuffer, 0);
     
     CIImage *unproccessedImage = [CIImage imageWithCVImageBuffer:grayImageBuffer];
+    
+    // Remove pixel artifacts; sharpen image result using lanczos transform.
     CIFilter *lanczosScaleTransform = [CIFilter filterWithName:@"CILanczosScaleTransform"];
     [lanczosScaleTransform setValue:unproccessedImage forKey:kCIInputImageKey];
     
@@ -448,6 +351,7 @@ typedef struct _sImagePlatformContext {
 
 - (IMAGE_TYPE*)createDisperityDepthImage {
     
+    // We already ran Depth model at this point, just need to convert output into image with correct orientation.
     CVPixelBufferRef scaledDepthPixelBufferRef = [self.scaledDepthImage pixelBuffer];
     
     IMAGE_TYPE * depthImage = [self imageFromCVPixelBufferRef:scaledDepthPixelBufferRef imageOrientation:UIImageOrientationUp];
@@ -463,10 +367,6 @@ typedef struct _sImagePlatformContext {
     CFDataRef xmpDataRef = (__bridge CFDataRef)xmpData;
     CGImageMetadataRef imgMetaData = CGImageMetadataCreateFromXMPData(xmpDataRef);
     
-    
-    
-    // NSError *error = nil;
-    
     NSDictionary *auxDict = @{(NSString*)kCGImageAuxiliaryDataInfoData : imageData,
                               (NSString*)kCGImageAuxiliaryDataInfoMetadata : (id)CFBridgingRelease(imgMetaData),
                               (NSString*)kCGImageAuxiliaryDataInfoDataDescription : infoMetadataDict};
@@ -474,246 +374,6 @@ typedef struct _sImagePlatformContext {
     //[AVDepthData depthDataFromDictionaryRepresentation:auxDict error:&error];
     
     return auxDict;
-}
-// NOTE: don't need unless want to integrate depth map directlty with image.
-- (NSData*)addDepthMapToExistingImage:(IMAGE_TYPE*)existingImage {
-    NSData *combinedImageData = NULL;
-    
-    NSMutableData *imageData = [NSMutableData data];
-    
-    CGImageDestinationRef imageDestination =  CGImageDestinationCreateWithData((__bridge CFMutableDataRef)imageData, (CFStringRef)@"public.jpeg", 1, NULL);
-    
-    if (imageDestination == nil) {
-        return nil;
-    }
-    
-    NSString *portraitStr = @"Portrait";
-    NSString *landscapeStr = @"Landscape";
-    NSString *orientationXMPFile = nil;
-    
-    if (existingImage.size.width > existingImage.size.height) {
-        orientationXMPFile = [NSString stringWithFormat:@"Depth%@", landscapeStr];
-    } else {
-        orientationXMPFile = [NSString stringWithFormat:@"Depth%@", portraitStr];
-    }
-    
-    NSString *xmpPath = [[NSBundle mainBundle] pathForResource:orientationXMPFile ofType:@"xmp"];
-    
-    
-    size_t bytesPerRow = _context.sizeX * sizeof(float);
-    size_t height = _context.sizeY;
-    size_t width  = _context.sizeX;
-    OSType pixelFormatType = kDepthFormat;
-    
-    NSDictionary *infoMetadataDict = @{@"BytesPerRow": @(bytesPerRow),
-                                       @"Height" : @(height),
-                                       @"PixelFormat" : @(pixelFormatType),
-                                       @"Width" : @(width)};
-    
-  
-    NSData *depthMapImageData = [NSData dataWithBytesNoCopy:_context.spBuff length:_context.spBuffSize freeWhenDone:NO];
-    
-    NSDictionary *auxiliaryDict = [self auxiliaryDictWithImageData:depthMapImageData
-                                                  infoMetadataDict:infoMetadataDict
-                                                           xmpPath:xmpPath];
-    
-    NSError *error = nil;
-    AVDepthData *depthDataUnscaled = [AVDepthData depthDataFromDictionaryRepresentation:auxiliaryDict error:&error];
-    AVDepthData *depthData = [depthDataUnscaled depthDataByReplacingDepthDataMapWithPixelBuffer:[self.scaledDepthImage pixelBuffer] error:&error];
-    
-    if (depthData == NULL) {
-        NSLog(@"ERROR - depthDataByReplacingDepthDataMapWithPixelBuffer failed: %@", error);
-        depthData = depthDataUnscaled;
-    }
-    
-    //CVPixelBufferRef depthDataMap = [depthData depthDataMap];
-    
-    // Use AVDepthData to get the auxiliary data dictionary.
-       NSString *auxDataType = nil;
-       NSDictionary *auxData = [depthData dictionaryRepresentationForAuxiliaryDataType:&auxDataType];
-       
-       CFDictionaryRef auxDataRef = (__bridge CFDictionaryRef)(auxData);
-       NSLog(@"auxDataRef = 0x%x", (unsigned int)auxDataRef);
-            
-    NSDictionary *exifDict = @{(NSString*)kCGImagePropertyExifDictionary:@{
-                                   @(0x0112):@(0x0000), //Orientation
-                                    (NSString*)kCGImagePropertyExifCustomRendered:@(0x0008), //Portrait
-                                    (NSString*)kCGImagePropertyExifUserComment:ML_MODEL_CLASS_NAME_STRING                                   
-    }};
-                               
-    CFDictionaryRef exifDictRef = (__bridge CFDictionaryRef)(exifDict);
-    CGImageDestinationAddImage(imageDestination, [existingImage asCGImageRef], ( CFDictionaryRef)exifDictRef );
-
-    // Add auxiliary data to the image destination.
-    CGImageDestinationAddAuxiliaryDataInfo(imageDestination, (CFStringRef)auxDataType, auxDataRef);
-    
-    if (CGImageDestinationFinalize(imageDestination)) {
-        combinedImageData = [NSData dataWithData:imageData];
-    }
-    
-    CFRelease(imageDestination);
-    
-    return combinedImageData;
-}
-
-#pragma mark - Depth buffer proccesing - Unused examples
-
-- (CVPixelBufferRef)createPixelBufferFromGrayData:(char *)grayBuff
-                                            sizeX:(int)sizeX
-                                            sizeY:(int)sizeY {
-    CVPixelBufferRef grayImageBuffer = NULL;
-    CGRect pixelBufferRect = CGRectMake(0.0f, 0.0f, (CGFloat)sizeX, (CGFloat)sizeY);
-    BOOL didSetup = [self setupPixelBuffer:&grayImageBuffer
-                           pixelFormatType:kCVPixelFormatType_32BGRA
-                                  withRect:pixelBufferRect];
-    
-    if (grayImageBuffer == NULL || didSetup == NO) {
-        return NULL;
-    }
-    
-    CVPixelBufferLockBaseAddress(grayImageBuffer, 0);
-    uint32_t *pRGBA = (uint32_t *)CVPixelBufferGetBaseAddress(grayImageBuffer);
-    
-    const vImage_Buffer grayBuffV = {grayBuff, sizeY, sizeX, sizeX};
-    const vImage_Buffer rgbaBuffV = {pRGBA, sizeY, sizeX, sizeX * 4};
-    
-    vImageConvert_Planar8ToBGRX8888(&grayBuffV, &grayBuffV, &grayBuffV, 0xFF, &rgbaBuffV, (vImage_Flags)0);
-    
-    CVPixelBufferUnlockBaseAddress(grayImageBuffer, 0);
-    return grayImageBuffer;
-}
-
-- (IMAGE_TYPE*)createBGRADepthImage {
-    
-    NSAssert((_context.pixelSizeInBytes == 8), @"Expected double sized elements");
-    
-    char *grayBuff = malloc(_context.sizeY*_context.sizeX*sizeof(char));
-    const  double scalar = 255.;
-    double *doubleBuff1 = malloc(_context.sizeY*_context.sizeX*sizeof(double));
-    vDSP_vsmulD((const double *)_context.pData, 1, &scalar, doubleBuff1, 1, _context.sizeY*_context.sizeX);
-    const double offset = -(scalar * (_context.minV / 2.));
-    double *doubleBuff2 = malloc(_context.sizeY*_context.sizeX*sizeof(double));
-    vDSP_vsaddD(doubleBuff1, 1, &offset, doubleBuff2, 1, _context.sizeY*_context.sizeX);
-    free(doubleBuff1);
-    vDSP_vfix8D(doubleBuff2, 1, grayBuff, 1,  _context.sizeY*_context.sizeX);
-    free(doubleBuff2);
-    
-    CVPixelBufferRef grayImageBuffer = [self createPixelBufferFromGrayData:grayBuff sizeX:_context.sizeX sizeY:_context.sizeY];
-    
-    free(grayBuff);
-    
-    if (grayImageBuffer == NULL) {
-        return NULL;
-    }
-    
-    IMAGE_TYPE *depthImage32 = [self imageFromCVPixelBufferRef:grayImageBuffer imageOrientation:UIImageOrientationUp];
-    
-    [self teardownPixelBuffer:&grayImageBuffer];
-    
-    return depthImage32;
-}
-
-- (CVPixelBufferRef)createFalseColorPixelBufferFromGrayData:(char *)grayBuff
-                                                      sizeX:(int)sizeX
-                                                      sizeY:(int)sizeY {
-    CVPixelBufferRef grayImageBuffer = NULL;
-    CGRect pixelBufferRect = CGRectMake(0.0f, 0.0f, (CGFloat)sizeX, (CGFloat)sizeY);
-    BOOL didSetup = [self setupPixelBuffer:&grayImageBuffer
-                           pixelFormatType:kCVPixelFormatType_32BGRA
-                                  withRect:pixelBufferRect];
-    
-    if (grayImageBuffer == NULL || didSetup == NO) {
-        return NULL;
-    }
-    
-    CVPixelBufferLockBaseAddress(grayImageBuffer, 0);
-    uint32_t *pRGBA = (uint32_t *)CVPixelBufferGetBaseAddress(grayImageBuffer);
-    
-    char *colBuff1 = malloc(sizeX*sizeY);
-    char *colBuff2 = malloc(sizeX*sizeY);
-    char *pSource = grayBuff;
-    char *pDest1 = colBuff1;
-    char *pDest2 = colBuff2;
-    for (int y = 0; y < sizeY; ++y) {
-        for (int x= 0; x < sizeX; ++x) {
-            *pDest1 = (char)((*pSource) * 2);
-            *pDest2 = 0xFF - (char)((*pSource) * 2);
-            pSource++;
-            pDest1++;
-            pDest2++;
-        }
-    }
-    
-    const vImage_Buffer grayBuffV = {grayBuff, sizeY, sizeX, sizeX};
-    const vImage_Buffer colBuffV1 = {colBuff1, sizeY, sizeX, sizeX};
-    const vImage_Buffer colBuffV2 = {colBuff2, sizeY, sizeX, sizeX};
-    const vImage_Buffer rgbaBuffV = {pRGBA, sizeY, sizeX, sizeX * 4};
-    
-    vImageConvert_Planar8ToBGRX8888(&colBuffV1, &grayBuffV, &colBuffV2, 0xFF, &rgbaBuffV, (vImage_Flags)0);
-    free(colBuff1);
-    free(colBuff2);
-    
-    CVPixelBufferUnlockBaseAddress(grayImageBuffer, 0);
-    return grayImageBuffer;
-}
-
-#pragma mark - Utility - Crop
-
-- (CGRect)cropRectFromImageSize:(CGSize)imageSize
-         withSizeForAspectRatio:(CGSize)sizeForaspectRatio {
-    
-    CGRect cropRect = CGRectZero;
-    CGFloat inWidth = imageSize.width;
-    CGFloat inHeight = imageSize.height;
-    
-    CGFloat aspectWidth = sizeForaspectRatio.width;
-    CGFloat aspectHeight = sizeForaspectRatio.height;
-    
-    CGFloat rx = inWidth/aspectWidth;           //E.G. 320/312 = 1.0256410256   |   704/312 = 2.2564102564
-    CGFloat ry = inHeight/aspectHeight;         //E.G. 240/312 = 0.7692307692   |   576/312 = 1.8461538462
-    CGFloat dx = 0.0f;
-    CGFloat dy = 0.0f;
-    
-    if(ry<rx) { //E.G. (320 - 240*312/312)/2 = 40   |   (704 - 576*312/312)/2 = 64
-        dx = (inWidth - inHeight*aspectWidth/aspectHeight) / 2.0f;
-        CGFloat newWidth  = (inWidth - (dx * 2.0f));
-        dy = 0.0f;
-        cropRect = CGRectMake(dx, dy, newWidth, inHeight);
-    } else {
-        dx = 0.0f;
-        dy = (inHeight - inWidth*aspectHeight/aspectWidth) / 2.0f;
-        CGFloat newHeight  = (inHeight - (dy * 2.0f));
-        cropRect = CGRectMake(dx, dy, inWidth, newHeight);
-    }
-    
-    return cropRect;
-}
-
-- (IMAGE_TYPE*)cropImage:(IMAGE_TYPE*)image withCropRect:(CGRect)cropRect {
-    IMAGE_TYPE *croppedImage = NULL;
-    
-    CGImageRef inputImageRef = [image asCGImageRef];
-    CIImage *ciInputImage = [CIImage imageWithCGImage:inputImageRef];
-    CGImageRef imageRef = [self.imagePlatformCoreContext
-                           createCGImage:ciInputImage
-                           fromRect:cropRect];
-    
-    if (imageRef) {
-#ifdef MACOS_TARGET
-        size_t imageWidth  = CGImageGetWidth(imageRef);
-        size_t imageHeight = CGImageGetHeight(imageRef);
-        NSSize imageSize = NSMakeSize((CGFloat)imageWidth, (CGFloat)imageHeight);
-        
-        
-        croppedImage = [[IMAGE_TYPE alloc] initWithCGImage:imageRef size:imageSize] ;
-#else
-        croppedImage = [IMAGE_TYPE imageWithCGImage:imageRef scale:1.0 orientation:image.imageOrientation];
-#endif
-        
-        CGImageRelease(imageRef);
-    }
-    
-    return croppedImage;
 }
 
 @end

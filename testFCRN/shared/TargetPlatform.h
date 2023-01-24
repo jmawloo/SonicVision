@@ -14,18 +14,6 @@
 
 // -----------------------------------------------------------------------------
 // Provide the correct #ifdef environemnt for the headers when included from an external client
-//
-#if ((defined(TARGET_OS_WATCH) && (TARGET_OS_WATCH == 1)))
-    #if !defined(WATCHOS_TARGET)
-        #define WATCHOS_TARGET
-    #endif //WATCHOS_TARGET
-#endif
-
-#if ((defined(TARGET_OS_OSX) && (TARGET_OS_OSX == 1)))
-    #if !defined(MACOS_TARGET)
-        #define MACOS_TARGET
-    #endif //MACOS_TARGET
-#endif
 
 #if ((defined(TARGET_OS_IOS) && (TARGET_OS_IOS == 1)))
     #if !defined(IOS_TARGET)
