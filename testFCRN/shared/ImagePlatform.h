@@ -44,9 +44,6 @@ NS_ASSUME_NONNULL_BEGIN
                                             sizeY:(int)sizeY;
 - (IMAGE_TYPE* __nullable)createDisperityDepthImage;
 //- (IMAGE_TYPE* __nullable)createBGRADepthImage;
-- (NSData*)addDepthMapToExistingImage:(IMAGE_TYPE*)existingImage;
-
-- (IMAGE_TYPE* __nullable)depthHistogram;
 
 @end
 

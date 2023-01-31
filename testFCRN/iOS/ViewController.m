@@ -14,6 +14,9 @@
 
 // TODO: focus on depth perception, (edge detection?), wide angle camera setting.
 // NOTE: Focussing on wide angle camera setting first.
+// Then see if depth perception still works.
+
+// TODO: normalize 0-1 depth perception.
 
 //ML_MODEL_CLASS_NAME is defined in "User defined build settings"
 //ML_MODEL_CLASS_HEADER_STRING=\"$(ML_MODEL_CLASS_NAME).h\"
@@ -70,6 +73,7 @@
 
 @end
 
+#define CONFIDENCE_THRESHOLD 0.5
 
 @implementation ViewController
 
@@ -126,7 +130,7 @@
     [self updateStatusLabelText:[NSString stringWithFormat:@"Error loading model (\"%@\") because \"%@\"", ML_MODEL_CLASS_NAME_STRING, error.localizedDescription]];
 }
 
-# pragma mark - Video Frame Capture
+# pragma mark - Wide angle Camera Capture
 
 - (void)setupCameraSession {
 
@@ -134,7 +138,8 @@
     self.session = [[AVCaptureSession alloc] init];
     [self.session setSessionPreset:AVCaptureSessionPresetLow];
 
-    AVCaptureDevice *inputDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    AVCaptureDevice *inputDevice = [AVCaptureDevice defaultDeviceWithDeviceType:AVCaptureDeviceTypeBuiltInWideAngleCamera mediaType: AVMediaTypeVideo position:AVCaptureDevicePositionBack
+    ];
     NSError *error;
     AVCaptureDeviceInput *deviceInput = [AVCaptureDeviceInput deviceInputWithDevice:inputDevice error:&error];
 
@@ -260,7 +265,6 @@
 // from https://stackoverflow.com/questions/59306701/coreml-and-yolov3-performance-issue
 - (void)classifyObjectsFromInputImage:(UIImage*)inputImage {
     NSError *error = nil;
-    float threshold = 0.8; // label objects only with 0.8+ accuracy.
     NSMutableArray<Prediction*> *predictions = [[NSMutableArray alloc] init];
     
     // Sort classification labels by highest confidence first:
@@ -272,7 +276,7 @@
         NSArray *results = request.results;
 
         for (VNObservation *observation in results) {
-            if([observation isKindOfClass:[VNRecognizedObjectObservation class]] && observation.confidence > threshold){ // Detected an object in the first place with confidence x.
+            if([observation isKindOfClass:[VNRecognizedObjectObservation class]] && observation.confidence > CONFIDENCE_THRESHOLD){ // Detected an object in the first place with confidence x.
                 VNRecognizedObjectObservation *obs = (VNRecognizedObjectObservation *) observation;
                 CGRect rect = obs.boundingBox;
                 
