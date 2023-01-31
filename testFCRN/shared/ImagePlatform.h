@@ -10,11 +10,32 @@
 #import "TargetPlatform.h"
 
 #if !defined(IMAGE_TYPE)
-    #import <UIKit/UIKit.h>
-    #define IMAGE_TYPE UIImage
+    #if (defined(WATCHOS_TARGET))
+        #import <UIKit/UIKit.h>
+        #define IMAGE_TYPE UIImage
+    #elif (defined(MACOS_TARGET))
+        #import <AppKit/AppKit.h>
+        #define IMAGE_TYPE NSImage
+    #else
+        #import <UIKit/UIKit.h>
+        #define IMAGE_TYPE UIImage
+    #endif
 #endif
 
 #define MAKE_RGBA_uint32_t(R, G, B, A) ((((uint32_t)(R & 0xFF)) << 24) | (((uint32_t)(G & 0xFF)) << 16) | (((uint32_t)(B & 0xFF)) << 8 ) | ((uint32_t)(A & 0xFF) << 0 ))
+
+#ifdef MACOS_TARGET
+typedef NS_ENUM(NSInteger, UIImageOrientation) {
+    UIImageOrientationUp,            // default orientation
+    UIImageOrientationDown,          // 180 deg rotation
+    UIImageOrientationLeft,          // 90 deg CCW
+    UIImageOrientationRight,         // 90 deg CW
+    UIImageOrientationUpMirrored,    // as above but image mirrored along other axis. horizontal flip
+    UIImageOrientationDownMirrored,  // horizontal flip
+    UIImageOrientationLeftMirrored,  // vertical flip
+    UIImageOrientationRightMirrored, // vertical flip
+};
+#endif
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -44,6 +65,14 @@ NS_ASSUME_NONNULL_BEGIN
                                             sizeY:(int)sizeY;
 - (IMAGE_TYPE* __nullable)createDisperityDepthImage;
 //- (IMAGE_TYPE* __nullable)createBGRADepthImage;
+- (NSData*)addDepthMapToExistingImage:(IMAGE_TYPE*)existingImage;
+
+- (CGRect)cropRectFromImageSize:(CGSize)imageSize
+         withSizeForAspectRatio:(CGSize)sizeForaspectRatio;
+
+- (IMAGE_TYPE* __nullable)cropImage:(IMAGE_TYPE*)image withCropRect:(CGRect)cropRect;
+
+- (IMAGE_TYPE* __nullable)depthHistogram;
 
 @end
 
