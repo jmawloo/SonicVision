@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "E85B07AA2312C5950047D978"
-               BuildableName = "testFCRN16-iOS.app"
-               BlueprintName = "testFCRN16-iOS"
+               BuildableName = "testFCRN-iOS.app"
+               BlueprintName = "testFCRN-iOS"
                ReferencedContainer = "container:testFCRN.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -45,8 +45,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E85B07AA2312C5950047D978"
-            BuildableName = "testFCRN16-iOS.app"
-            BlueprintName = "testFCRN16-iOS"
+            BuildableName = "testFCRN-iOS.app"
+            BlueprintName = "testFCRN-iOS"
             ReferencedContainer = "container:testFCRN.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -62,8 +62,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E85B07AA2312C5950047D978"
-            BuildableName = "testFCRN16-iOS.app"
-            BlueprintName = "testFCRN16-iOS"
+            BuildableName = "testFCRN-iOS.app"
+            BlueprintName = "testFCRN-iOS"
             ReferencedContainer = "container:testFCRN.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

@@ -21,7 +21,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Peepee poopoo</string>
+	<string>Please enable camera to use MLModels</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Load images from your photo library and save them with predicted depth information</string>
 	<key>NSPhotoLibraryUsageDescription</key>

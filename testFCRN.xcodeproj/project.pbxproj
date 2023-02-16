@@ -7,11 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		DFDBB31F28FE37200081FB08 /* YOLOv3FP16.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = DFDBB31C28FE37200081FB08 /* YOLOv3FP16.mlmodel */; };
-		DFDBB32028FE37200081FB08 /* YOLOv3Int8LUT.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = DFDBB31D28FE37200081FB08 /* YOLOv3Int8LUT.mlmodel */; };
-		DFDBB32128FE37200081FB08 /* YOLOv3Int8LUT.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = DFDBB31D28FE37200081FB08 /* YOLOv3Int8LUT.mlmodel */; };
+		1F04239C2999C424000AC624 /* FCRN.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = E8201F4722EF1A1D0098B7DB /* FCRN.mlmodel */; };
+		1F43CD89298992C700A5E4DA /* WideCameraCaptureOutput.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F43CD88298992C700A5E4DA /* WideCameraCaptureOutput.m */; };
+		1F43CD8C2999B86200A5E4DA /* YOLOv3.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 1F43CD8B2999B86200A5E4DA /* YOLOv3.mlmodel */; };
 		DFEBCEAE290E07B60027B013 /* Prediction.m in Sources */ = {isa = PBXBuildFile; fileRef = DFEBCEAD290E07B60027B013 /* Prediction.m */; };
-		DFEBCEAF290E07B60027B013 /* Prediction.m in Sources */ = {isa = PBXBuildFile; fileRef = DFEBCEAD290E07B60027B013 /* Prediction.m */; };
 		E85B07AF2312C5950047D978 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E85B07AE2312C5950047D978 /* AppDelegate.m */; };
 		E85B07B22312C5950047D978 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E85B07B12312C5950047D978 /* SceneDelegate.m */; };
 		E85B07B52312C5950047D978 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E85B07B42312C5950047D978 /* ViewController.m */; };
@@ -19,33 +18,20 @@
 		E85B07BA2312C5970047D978 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E85B07B92312C5970047D978 /* Assets.xcassets */; };
 		E85B07BD2312C5970047D978 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E85B07BB2312C5970047D978 /* LaunchScreen.storyboard */; };
 		E85B07C02312C5970047D978 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E85B07BF2312C5970047D978 /* main.m */; };
-		E85B07C62312C6200047D978 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E85B07B42312C5950047D978 /* ViewController.m */; };
-		E85B07C72312C6200047D978 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E85B07AE2312C5950047D978 /* AppDelegate.m */; };
-		E85B07C82312C6200047D978 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E85B07BF2312C5970047D978 /* main.m */; };
-		E85B07C92312C6200047D978 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E85B07B12312C5950047D978 /* SceneDelegate.m */; };
-		E85B07CC2312C6200047D978 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E85B07BB2312C5970047D978 /* LaunchScreen.storyboard */; };
-		E85B07CD2312C6200047D978 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E85B07B92312C5970047D978 /* Assets.xcassets */; };
-		E85B07CE2312C6200047D978 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E85B07B62312C5950047D978 /* Main.storyboard */; };
-		E85B07D42312CB930047D978 /* FCRNFP16.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = E8201F4922EF1A250098B7DB /* FCRNFP16.mlmodel */; };
-		E85B07D52312CB970047D978 /* FCRN.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = E8201F4722EF1A1D0098B7DB /* FCRN.mlmodel */; };
 		E85B07D62312CBA00047D978 /* ImagePlatform.m in Sources */ = {isa = PBXBuildFile; fileRef = E8A7368522ED7D6B00309FD0 /* ImagePlatform.m */; };
-		E85B07D72312CBA10047D978 /* ImagePlatform.m in Sources */ = {isa = PBXBuildFile; fileRef = E8A7368522ED7D6B00309FD0 /* ImagePlatform.m */; };
 		E85B07D82312CBD40047D978 /* DepthPortrait.xmp in Resources */ = {isa = PBXBuildFile; fileRef = E87F8F8822FC735C00E48DB8 /* DepthPortrait.xmp */; };
-		E85B07D92312CBD50047D978 /* DepthPortrait.xmp in Resources */ = {isa = PBXBuildFile; fileRef = E87F8F8822FC735C00E48DB8 /* DepthPortrait.xmp */; };
 		E85B07DA2312CBD70047D978 /* Matte.xmp in Resources */ = {isa = PBXBuildFile; fileRef = E87F8F8922FC735C00E48DB8 /* Matte.xmp */; };
-		E85B07DB2312CBD80047D978 /* Matte.xmp in Resources */ = {isa = PBXBuildFile; fileRef = E87F8F8922FC735C00E48DB8 /* Matte.xmp */; };
 		E85B07DC2312CBDA0047D978 /* DepthLandscape.xmp in Resources */ = {isa = PBXBuildFile; fileRef = E87F8F8A22FC735C00E48DB8 /* DepthLandscape.xmp */; };
-		E85B07DD2312CBDB0047D978 /* DepthLandscape.xmp in Resources */ = {isa = PBXBuildFile; fileRef = E87F8F8A22FC735C00E48DB8 /* DepthLandscape.xmp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		DFDBB31C28FE37200081FB08 /* YOLOv3FP16.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = YOLOv3FP16.mlmodel; sourceTree = "<group>"; };
-		DFDBB31D28FE37200081FB08 /* YOLOv3Int8LUT.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = YOLOv3Int8LUT.mlmodel; sourceTree = "<group>"; };
+		1F43CD88298992C700A5E4DA /* WideCameraCaptureOutput.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WideCameraCaptureOutput.m; sourceTree = "<group>"; };
+		1F43CD8A298992F300A5E4DA /* WideCameraCaptureOutput.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WideCameraCaptureOutput.h; sourceTree = "<group>"; };
+		1F43CD8B2999B86200A5E4DA /* YOLOv3.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = YOLOv3.mlmodel; sourceTree = "<group>"; };
 		DFEBCEA9290E06C80027B013 /* Prediction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Prediction.h; sourceTree = "<group>"; };
 		DFEBCEAD290E07B60027B013 /* Prediction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Prediction.m; sourceTree = "<group>"; };
 		E8201F4722EF1A1D0098B7DB /* FCRN.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = FCRN.mlmodel; sourceTree = "<group>"; };
-		E8201F4922EF1A250098B7DB /* FCRNFP16.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = FCRNFP16.mlmodel; sourceTree = "<group>"; };
-		E85B07AB2312C5950047D978 /* testFCRN16-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "testFCRN16-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E85B07AB2312C5950047D978 /* testFCRN-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "testFCRN-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E85B07AD2312C5950047D978 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		E85B07AE2312C5950047D978 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		E85B07B02312C5950047D978 /* SceneDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SceneDelegate.h; sourceTree = "<group>"; };
@@ -57,7 +43,6 @@
 		E85B07BC2312C5970047D978 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		E85B07BE2312C5970047D978 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E85B07BF2312C5970047D978 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		E85B07D22312C6200047D978 /* testFCRN32-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "testFCRN32-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E87F8F8822FC735C00E48DB8 /* DepthPortrait.xmp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DepthPortrait.xmp; sourceTree = "<group>"; };
 		E87F8F8922FC735C00E48DB8 /* Matte.xmp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Matte.xmp; sourceTree = "<group>"; };
 		E87F8F8A22FC735C00E48DB8 /* DepthLandscape.xmp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DepthLandscape.xmp; sourceTree = "<group>"; };
@@ -74,23 +59,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E85B07CA2312C6200047D978 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		E8201F4622EF19FA0098B7DB /* mlmodels */ = {
 			isa = PBXGroup;
 			children = (
-				E8201F4922EF1A250098B7DB /* FCRNFP16.mlmodel */,
+				1F43CD8B2999B86200A5E4DA /* YOLOv3.mlmodel */,
 				E8201F4722EF1A1D0098B7DB /* FCRN.mlmodel */,
-				DFDBB31C28FE37200081FB08 /* YOLOv3FP16.mlmodel */,
-				DFDBB31D28FE37200081FB08 /* YOLOv3Int8LUT.mlmodel */,
 			);
 			name = mlmodels;
 			path = ../mlmodels;
@@ -123,6 +99,8 @@
 				E85B07BB2312C5970047D978 /* LaunchScreen.storyboard */,
 				E85B07BE2312C5970047D978 /* Info.plist */,
 				E85B07BF2312C5970047D978 /* main.m */,
+				1F43CD88298992C700A5E4DA /* WideCameraCaptureOutput.m */,
+				1F43CD8A298992F300A5E4DA /* WideCameraCaptureOutput.h */,
 			);
 			path = iOS;
 			sourceTree = "<group>";
@@ -148,8 +126,7 @@
 		E8A7365B22ED7BE400309FD0 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				E85B07AB2312C5950047D978 /* testFCRN16-iOS.app */,
-				E85B07D22312C6200047D978 /* testFCRN32-iOS.app */,
+				E85B07AB2312C5950047D978 /* testFCRN-iOS.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -167,9 +144,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		E85B07AA2312C5950047D978 /* testFCRN16-iOS */ = {
+		E85B07AA2312C5950047D978 /* testFCRN-iOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E85B07C32312C5970047D978 /* Build configuration list for PBXNativeTarget "testFCRN16-iOS" */;
+			buildConfigurationList = E85B07C32312C5970047D978 /* Build configuration list for PBXNativeTarget "testFCRN-iOS" */;
 			buildPhases = (
 				E85B07A72312C5950047D978 /* Sources */,
 				E85B07A82312C5950047D978 /* Frameworks */,
@@ -179,26 +156,9 @@
 			);
 			dependencies = (
 			);
-			name = "testFCRN16-iOS";
+			name = "testFCRN-iOS";
 			productName = testFCRN;
-			productReference = E85B07AB2312C5950047D978 /* testFCRN16-iOS.app */;
-			productType = "com.apple.product-type.application";
-		};
-		E85B07C42312C6200047D978 /* testFCRN32-iOS */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = E85B07CF2312C6200047D978 /* Build configuration list for PBXNativeTarget "testFCRN32-iOS" */;
-			buildPhases = (
-				E85B07C52312C6200047D978 /* Sources */,
-				E85B07CA2312C6200047D978 /* Frameworks */,
-				E85B07CB2312C6200047D978 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = "testFCRN32-iOS";
-			productName = testFCRN;
-			productReference = E85B07D22312C6200047D978 /* testFCRN32-iOS.app */;
+			productReference = E85B07AB2312C5950047D978 /* testFCRN-iOS.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -228,8 +188,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				E85B07AA2312C5950047D978 /* testFCRN16-iOS */,
-				E85B07C42312C6200047D978 /* testFCRN32-iOS */,
+				E85B07AA2312C5950047D978 /* testFCRN-iOS */,
 			);
 		};
 /* End PBXProject section */
@@ -248,19 +207,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E85B07CB2312C6200047D978 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				E85B07CC2312C6200047D978 /* LaunchScreen.storyboard in Resources */,
-				E85B07DB2312CBD80047D978 /* Matte.xmp in Resources */,
-				E85B07CD2312C6200047D978 /* Assets.xcassets in Resources */,
-				E85B07D92312CBD50047D978 /* DepthPortrait.xmp in Resources */,
-				E85B07CE2312C6200047D978 /* Main.storyboard in Resources */,
-				E85B07DD2312CBDB0047D978 /* DepthLandscape.xmp in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -268,30 +214,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1F04239C2999C424000AC624 /* FCRN.mlmodel in Sources */,
 				E85B07D62312CBA00047D978 /* ImagePlatform.m in Sources */,
 				DFEBCEAE290E07B60027B013 /* Prediction.m in Sources */,
-				DFDBB32028FE37200081FB08 /* YOLOv3Int8LUT.mlmodel in Sources */,
+				1F43CD8C2999B86200A5E4DA /* YOLOv3.mlmodel in Sources */,
 				E85B07B52312C5950047D978 /* ViewController.m in Sources */,
 				E85B07AF2312C5950047D978 /* AppDelegate.m in Sources */,
 				E85B07C02312C5970047D978 /* main.m in Sources */,
-				E85B07D42312CB930047D978 /* FCRNFP16.mlmodel in Sources */,
 				E85B07B22312C5950047D978 /* SceneDelegate.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E85B07C52312C6200047D978 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				E85B07D72312CBA10047D978 /* ImagePlatform.m in Sources */,
-				DFEBCEAF290E07B60027B013 /* Prediction.m in Sources */,
-				DFDBB32128FE37200081FB08 /* YOLOv3Int8LUT.mlmodel in Sources */,
-				E85B07C62312C6200047D978 /* ViewController.m in Sources */,
-				E85B07D52312CB970047D978 /* FCRN.mlmodel in Sources */,
-				E85B07C72312C6200047D978 /* AppDelegate.m in Sources */,
-				DFDBB31F28FE37200081FB08 /* YOLOv3FP16.mlmodel in Sources */,
-				E85B07C82312C6200047D978 /* main.m in Sources */,
-				E85B07C92312C6200047D978 /* SceneDelegate.m in Sources */,
+				1F43CD89298992C700A5E4DA /* WideCameraCaptureOutput.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -321,6 +252,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 79HFG57L33;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -334,10 +266,11 @@
 					"@executable_path/Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
-				ML_MODEL_CLASS_NAME = FCRNFP16;
-				ML_MODEL_OBJ_NAME = YOLOv3Int8LUT;
-				PRODUCT_BUNDLE_IDENTIFIER = tech.jma.testFCRN16;
+				ML_MODEL_CLASS_NAME = FCRN;
+				ML_MODEL_OBJ_NAME = YOLOv3;
+				PRODUCT_BUNDLE_IDENTIFIER = jma.SonicVision;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -347,6 +280,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 79HFG57L33;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -365,57 +299,11 @@
 					"@executable_path/Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
-				ML_MODEL_CLASS_NAME = FCRNFP16;
-				ML_MODEL_OBJ_NAME = YOLOv3Int8LUT;
-				PRODUCT_BUNDLE_IDENTIFIER = tech.jma.testFCRN16;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
-		E85B07D02312C6200047D978 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 79HFG57L33;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = testFCRN/iOS/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				ML_MODEL_CLASS_NAME = FCRN;
-				PRODUCT_BUNDLE_IDENTIFIER = tech.dadler.testFCRN;
+				ML_MODEL_OBJ_NAME = YOLOv3;
+				PRODUCT_BUNDLE_IDENTIFIER = jma.SonicVision;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		E85B07D12312C6200047D978 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 79HFG57L33;
-				INFOPLIST_FILE = testFCRN/iOS/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
-				ML_MODEL_CLASS_NAME = FCRN;
-				PRODUCT_BUNDLE_IDENTIFIER = tech.dadler.testFCRN;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
@@ -481,7 +369,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.13.2;
-				ML_MODEL_CLASS_NAME = "";
+				ML_MODEL_CLASS_NAME = FCRN;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -542,7 +430,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.13.2;
-				ML_MODEL_CLASS_NAME = "";
+				ML_MODEL_CLASS_NAME = FCRN;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
@@ -552,20 +440,11 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		E85B07C32312C5970047D978 /* Build configuration list for PBXNativeTarget "testFCRN16-iOS" */ = {
+		E85B07C32312C5970047D978 /* Build configuration list for PBXNativeTarget "testFCRN-iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				E85B07C12312C5970047D978 /* Debug */,
 				E85B07C22312C5970047D978 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		E85B07CF2312C6200047D978 /* Build configuration list for PBXNativeTarget "testFCRN32-iOS" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				E85B07D02312C6200047D978 /* Debug */,
-				E85B07D12312C6200047D978 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

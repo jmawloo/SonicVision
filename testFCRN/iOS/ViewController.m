@@ -22,7 +22,7 @@
 //ML_MODEL_CLASS_HEADER_STRING=\"$(ML_MODEL_CLASS_NAME).h\"
 //ML_MODEL_CLASS=$(ML_MODEL_CLASS_NAME)
 //ML_MODEL_CLASS_NAME_STRING=@\"$(ML_MODEL_CLASS_NAME)\"
-
+// NOTE: https://stackoverflow.com/questions/5198905/h-file-not-found if experience *.h file not found
 #import ML_MODEL_CLASS_HEADER_STRING
 #import ML_MODEL_OBJ_HEADER_STRING
 #import "ImagePlatform.h"
@@ -73,7 +73,7 @@
 
 @end
 
-#define CONFIDENCE_THRESHOLD 0.5
+#define DETECTION_CONFIDENCE_THRESHOLD 0.5
 
 @implementation ViewController
 
@@ -118,7 +118,6 @@
 }
 
 - (void)didLoadModel {
-    //self.textView.stringValue = NSLocalizedString(@"depthPrediction.readyToOpen", @"Please open an image");
     NSLog(@"didLoadModel (\"%@\") & (\"%@\")", ML_MODEL_CLASS_NAME_STRING, ML_MODEL_OBJ_NAME_STRING);
     [self updateStatusLabelText:[NSString stringWithFormat:@"didLoadModel (\"%@\") & (\"%@\")", ML_MODEL_CLASS_NAME_STRING, ML_MODEL_OBJ_NAME_STRING]];
     
@@ -136,16 +135,33 @@
 
 
     self.session = [[AVCaptureSession alloc] init];
-    [self.session setSessionPreset:AVCaptureSessionPresetLow];
+    [self.session setSessionPreset:AVCaptureSessionPreset640x480];
 
     AVCaptureDevice *inputDevice = [AVCaptureDevice defaultDeviceWithDeviceType:AVCaptureDeviceTypeBuiltInWideAngleCamera mediaType: AVMediaTypeVideo position:AVCaptureDevicePositionBack
     ];
+    
+    // Configure hardware to zoom out.
     NSError *error;
+    [inputDevice lockForConfiguration:&error];
+    
+    inputDevice.videoZoomFactor = 1.0;
+    
+    [inputDevice unlockForConfiguration];
+    
     AVCaptureDeviceInput *deviceInput = [AVCaptureDeviceInput deviceInputWithDevice:inputDevice error:&error];
 
     if ([self.session canAddInput:deviceInput]) {
         [self.session addInput:deviceInput];
     }
+
+
+    // TODO: convert to AVCapturePhotoOutput and add wide camera angle setting.
+    self.stillImageInput = [[AVCaptureStillImageOutput alloc] init];
+    NSDictionary *outputSettings = [[NSDictionary alloc] initWithObjectsAndKeys:AVVideoCodecTypeJPEG, AVVideoCodecKey, nil];
+    [self.stillImageInput setOutputSettings:outputSettings];
+    [self.session addOutput:self.stillImageInput];
+    
+    
     // mount feed to view.
     AVCaptureVideoPreviewLayer *previewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:self.session];
     [previewLayer setVideoGravity:AVLayerVideoGravityResizeAspectFill];
@@ -154,11 +170,6 @@
     CGRect frame = self.inputImageView.frame;
     [previewLayer setFrame:frame];
     [rootLayer insertSublayer:previewLayer atIndex:0];
-
-    self.stillImageInput = [[AVCaptureStillImageOutput alloc] init];
-    NSDictionary *outputSettings = [[NSDictionary alloc] initWithObjectsAndKeys:AVVideoCodecTypeJPEG, AVVideoCodecKey, nil];
-    [self.stillImageInput setOutputSettings:outputSettings];
-    [self.session addOutput:self.stillImageInput];
 }
 
 - (IBAction)handleActionForToggleVideoCaptureSwitch:(id)sender {
@@ -179,6 +190,34 @@
             [self.session stopRunning];
         }
     });
+}
+
+- (CGImagePropertyOrientation) getImgOrientation {
+    // Determine current camera orientation:
+    UIDeviceOrientation curDeviceOrientation = UIDevice.currentDevice.orientation;
+
+    switch (curDeviceOrientation) {
+    case (UIDeviceOrientationPortraitUpsideDown):  // Device oriented vertically, home button on the top00
+            NSLog(@"UpsideDownDeviceOrientation");
+            return kCGImagePropertyOrientationLeftMirrored;
+//            return kCGImagePropertyOrientationLeft;
+    case (UIDeviceOrientationLandscapeLeft):       // Device oriented horizontally, home button on the right
+            NSLog(@"LeftDeviceOrientation");
+//            return kCGImagePropertyOrientationUpMirrored;
+            return kCGImagePropertyOrientationLeftMirrored;
+    case (UIDeviceOrientationLandscapeRight):      // Device oriented horizontally, home button on the left
+            NSLog(@"RightDeviceOrientation");
+
+          return kCGImagePropertyOrientationRightMirrored;
+    case (UIDeviceOrientationPortrait):      // Device oriented horizontally, home button on the left
+            NSLog(@"UpDeviceOrientation");
+
+          return kCGImagePropertyOrientationRightMirrored;
+    default: // UIDeviceOrientationPortrait. Device oriented vertically, home button on the bottom
+            NSLog(@"OtherDeviceOrientation");
+
+            return kCGImagePropertyOrientationDownMirrored;
+    }
 }
 
 - (void) takePhoto {
@@ -241,18 +280,25 @@
     for (Prediction* pred in preds) {
         // Generate new rectangle scaled:
         // TODO: verify that these are mapped correctly.
-        CGRect scaledRect = CGRectMake(pred.BBox.origin.x * img.size.width, pred.BBox.origin.y * img.size.height, pred.BBox.size.width * img.size.width, pred.BBox.size.height * img.size.height);
+        // NOTE: full image dimensions are width * scale, and height * scale
+//        float width = pred.BBox.size.width * img.size.width * img.scale;
+//        float height = pred.BBox.size.height * img.size.height * img.scale;
+//        float x = pred.BBox.origin.x * img.size.width * img.scale;
+//        float y = height - (pred.BBox.origin.y * img.size.height * img.scale);
+        
+//        CGRect scaledRect = CGRectMake(x, y, width, height);
         
         NSMutableParagraphStyle* textStyle = NSMutableParagraphStyle.defaultParagraphStyle.mutableCopy;
         textStyle.alignment = NSTextAlignmentLeft;
 
-        NSDictionary* textFontAttributes = @{NSFontAttributeName: [UIFont fontWithName: @"Helvetica" size: 12], NSForegroundColorAttributeName: UIColor.greenColor, NSParagraphStyleAttributeName: textStyle};
+        NSDictionary* textFontAttributes = @{NSFontAttributeName: [UIFont fontWithName: @"Helvetica" size: 16], NSForegroundColorAttributeName: UIColor.greenColor, NSParagraphStyleAttributeName: textStyle};
 
-        [[NSString stringWithFormat:@"%@ %0.2f %%", pred.Label, pred.Confidence * 100] drawInRect:scaledRect withAttributes:textFontAttributes];
+        [[NSString stringWithFormat:@"%@ %0.2f %%", pred.Label, pred.Confidence * 100] drawInRect:pred.BBox withAttributes:textFontAttributes];
         
-        UIRectFrame(scaledRect);
+        //UIRectFrame(scaledRect);
+        UIRectFrame(pred.BBox);
         
-        NSLog(@"rectCoords {x,y,width,height} = \"%@\"", NSStringFromCGRect(scaledRect));
+        NSLog(@"rectCoords {x,y,width,height} = \"%@\"", NSStringFromCGRect(pred.BBox));
     }
     
       UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
@@ -276,9 +322,9 @@
         NSArray *results = request.results;
 
         for (VNObservation *observation in results) {
-            if([observation isKindOfClass:[VNRecognizedObjectObservation class]] && observation.confidence > CONFIDENCE_THRESHOLD){ // Detected an object in the first place with confidence x.
+            if([observation isKindOfClass:[VNRecognizedObjectObservation class]] && observation.confidence > DETECTION_CONFIDENCE_THRESHOLD){ // Detected an object in the first place with confidence x.
                 VNRecognizedObjectObservation *obs = (VNRecognizedObjectObservation *) observation;
-                CGRect rect = obs.boundingBox;
+                CGRect rect = VNImageRectForNormalizedRect(obs.boundingBox, (int) (inputImage.size.width * inputImage.scale), (int) (inputImage.size.height * inputImage.scale));
                 
                 NSArray<VNClassificationObservation *> *labels = obs.labels;
                 VNClassificationObservation *bestLabel = [labels sortedArrayUsingDescriptors:@[sd]][0];
@@ -300,6 +346,7 @@
     
     // NOTE: unsure about options field:
     self.handler = [[VNImageRequestHandler alloc] initWithCGImage: imageRef
+                                                      orientation:[self getImgOrientation]
                                                           options:@{VNImageOptionCIContext : self.imagePlatform.imagePlatformCoreContext}];
     
     // object classification:
@@ -317,6 +364,8 @@
 
 - (void)predictDepthMapFromInputImage:(UIImage*)inputImage {
     NSError *error = nil;
+    
+    NSLog(@"image dimensions: %.3f by %.3f, scale: %.3f", inputImage.size.width, inputImage.size.height, inputImage.scale);
 
     VNRequestCompletionHandler completionHandler =  ^(VNRequest *request, NSError * _Nullable error) {
         NSArray *results = request.results;
