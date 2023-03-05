@@ -45,6 +45,9 @@
 @property (nonatomic, strong) VNCoreMLRequest *request;
 @property (nonatomic, strong) VNImageRequestHandler *handler;
 
+@property (nonatomic, strong) NSMutableArray<Prediction*> *predictions;
+
+
 @property (nonatomic, strong) ImagePlatform* imagePlatform;
 
 @property (nonatomic, strong) AVCaptureStillImageOutput *stillImageInput;
@@ -65,7 +68,6 @@
 @property (nonatomic, strong) NSData *combinedImageData;
 
 @property (nonatomic, weak) IBOutlet UISwitch *toggleVideoCapture;
-@property (nonatomic, weak) IBOutlet UISlider *framerate;
 
 // FPS
 @property (nonatomic, weak) IBOutlet UILabel *fpsDepth;
@@ -73,7 +75,7 @@
 
 @end
 
-#define DETECTION_CONFIDENCE_THRESHOLD 0.5
+#define DETECTION_CONFIDENCE_THRESHOLD 0
 
 @implementation ViewController
 
@@ -164,7 +166,7 @@
     
     // mount feed to view.
     AVCaptureVideoPreviewLayer *previewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:self.session];
-    [previewLayer setVideoGravity:AVLayerVideoGravityResizeAspectFill];
+//    [previewLayer setVideoGravity:AVLayerVideoGravityResizeAspectFill];
     CALayer *rootLayer = [[self view] layer];
     [rootLayer setMasksToBounds:YES];
     CGRect frame = self.inputImageView.frame;
@@ -178,12 +180,14 @@
             if (!self.session) {
                 [self setupCameraSession];
             }
-            //    dispatch_async(dispatch_get_main_queue(), ^{
-            //    });
+//            dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE, 0), ^{
+//
+//
+////                [[NSRunLoop mainRunLoop] addTimer:self.timer forMode:NSRunLoopCommonModes];
+//            });
             // NOTE: this doesn't work when being called on a separate thread.
             [self.session startRunning];
-            
-            self.timer = [NSTimer scheduledTimerWithTimeInterval:1.0/self.framerate.value  target:self selector:@selector(takePhoto) userInfo:nil repeats:YES];
+            self.timer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(takePhoto) userInfo:nil repeats:YES];
         }
         else {
             [self.timer invalidate];
@@ -192,32 +196,113 @@
     });
 }
 
-- (CGImagePropertyOrientation) getImgOrientation {
-    // Determine current camera orientation:
-    UIDeviceOrientation curDeviceOrientation = UIDevice.currentDevice.orientation;
+#pragma mark - Output conversion utility functions
 
-    switch (curDeviceOrientation) {
-    case (UIDeviceOrientationPortraitUpsideDown):  // Device oriented vertically, home button on the top00
-            NSLog(@"UpsideDownDeviceOrientation");
-            return kCGImagePropertyOrientationLeftMirrored;
-//            return kCGImagePropertyOrientationLeft;
-    case (UIDeviceOrientationLandscapeLeft):       // Device oriented horizontally, home button on the right
-            NSLog(@"LeftDeviceOrientation");
-//            return kCGImagePropertyOrientationUpMirrored;
-            return kCGImagePropertyOrientationLeftMirrored;
-    case (UIDeviceOrientationLandscapeRight):      // Device oriented horizontally, home button on the left
-            NSLog(@"RightDeviceOrientation");
-
-          return kCGImagePropertyOrientationRightMirrored;
-    case (UIDeviceOrientationPortrait):      // Device oriented horizontally, home button on the left
-            NSLog(@"UpDeviceOrientation");
-
-          return kCGImagePropertyOrientationRightMirrored;
-    default: // UIDeviceOrientationPortrait. Device oriented vertically, home button on the bottom
-            NSLog(@"OtherDeviceOrientation");
-
-            return kCGImagePropertyOrientationDownMirrored;
+// Computes average depth per prediction box; modifies prediction objects in place.
+- (void) convertToAvgDepth:(NSArray<Prediction *> *)predictions depthMap:(UIImage *)depthMap {
+//    NSMutableArray<NSNumber *> *avgDepths = [NSMutableArray array];
+    for (Prediction *prediction in predictions) {
+        CGRect rect = prediction.BBox;  // Already converted to image dimensions.
+        CGFloat totalDepth = 0;
+        NSUInteger count = 0;
+        
+        // Check every pixel in bounding box:
+        // NOTE: For more accurate avgDepth, weigh the "closer" values more highly.
+        for (int x = rect.origin.x; x < rect.origin.x + rect.size.width; x++) {
+            for (int y = rect.origin.y; y < rect.origin.y + rect.size.height; y++) {
+                if (x >= 0 && x < depthMap.size.width && y >= 0 && y < depthMap.size.height) {
+                    CGFloat depth = [self depthAtPoint:CGPointMake(x, y) inDepthMap:depthMap];
+                    if (!isnan(depth)) {
+                        totalDepth += depth;
+                        count++;
+                    }
+                }
+            }
+        }
+        if (count > 0) {
+            CGFloat avgDepth = totalDepth / count;
+            prediction.AvgDepth = avgDepth;
+        }
     }
+}
+
+- (CGFloat)depthAtPoint:(CGPoint)point inDepthMap:(UIImage *)depthMap {
+    CGImageRef cgImage = depthMap.CGImage;
+    if (cgImage == NULL) {
+        return NAN;
+    }
+    NSUInteger width = CGImageGetWidth(cgImage);
+    NSUInteger height = CGImageGetHeight(cgImage);
+    NSUInteger bytesPerPixel = CGImageGetBitsPerPixel(cgImage) / 8;
+    NSUInteger bytesPerRow = CGImageGetBytesPerRow(cgImage);
+    NSUInteger bitsPerComponent = CGImageGetBitsPerComponent(cgImage);
+    CGDataProviderRef provider = CGImageGetDataProvider(cgImage);
+    if (provider == NULL) {
+        return NAN;
+    }
+    CFDataRef data = CGDataProviderCopyData(provider);
+    if (data == NULL) {
+        return NAN;
+    }
+    const UInt8 *bytes = CFDataGetBytePtr(data);
+    if (bytes == NULL) {
+        CFRelease(data);
+        return NAN;
+    }
+    NSUInteger x = round(point.x);
+    NSUInteger y = round(point.y);
+    if (x >= width || y >= height) {
+        CFRelease(data);
+        return NAN;
+    }
+    const UInt8 *pixel = bytes + y * bytesPerRow + x * bytesPerPixel;
+    CGFloat depth = 0;
+    if (bitsPerComponent == 16) {
+        uint16_t *pixel16 = (uint16_t *)pixel;
+        depth = (CGFloat)(*pixel16) / UINT16_MAX;
+    } else if (bitsPerComponent == 8) {
+        UInt8 *pixel8 = (UInt8 *)pixel;
+        depth = (CGFloat)(*pixel8) / UINT8_MAX;
+    }
+    CFRelease(data);
+    return depth;
+}
+
+#pragma mark - Image utility functions
+
+- (UIImage *)imageWithImage:(UIImage *)image scaledToSize:(CGSize)newSize {
+    //UIGraphicsBeginImageContext(newSize);
+    // In next line, pass 0.0 to use the current device's pixel scaling factor (and thus account for Retina resolution).
+    // Pass 1.0 to force exact pixel size.
+    UIGraphicsBeginImageContextWithOptions(newSize, NO, 0.0);
+    [image drawInRect:CGRectMake(0, 0, newSize.width, newSize.height)];
+    UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return newImage;
+}
+
+- (CGImagePropertyOrientation) getImgOrientation:(bool)forDepth {
+    if (forDepth) {
+        return kCGImagePropertyOrientationRight;
+//        return kCGImagePropertyOrientationUp;
+    }
+    
+    return kCGImagePropertyOrientationRightMirrored; // for classification
+    // Determine current camera orientation:
+//    UIDeviceOrientation curDeviceOrientation = UIDevice.currentDevice.orientation;
+
+//    switch (curDeviceOrientation) {
+//    case (UIDeviceOrientationPortraitUpsideDown):  // Device oriented vertically, home button on the top00
+//            return kCGImagePropertyOrientationRightMirrored;
+//    case (UIDeviceOrientationLandscapeLeft):       // Device oriented horizontally, home button on the right
+//            return kCGImagePropertyOrientationRightMirrored;
+//    case (UIDeviceOrientationLandscapeRight):      // Device oriented horizontally, home button on the left
+//          return kCGImagePropertyOrientationRightMirrored;
+//    case (UIDeviceOrientationPortrait):      // Device oriented horizontally, home button on the left
+//          return kCGImagePropertyOrientationRightMirrored;
+//    default: // UIDeviceOrientationPortrait. Device oriented vertically, home button on the bottom
+//            return kCGImagePropertyOrientationRightMirrored;
+//    }
 }
 
 - (void) takePhoto {
@@ -234,17 +319,22 @@
             break;
         }
     }
+//    NSLog(@"test");
+    if (!videoConnection || !videoConnection.enabled || !videoConnection.active) return;   // Video connection not ready yet.
+//    NSLog(@"connection: %@", videoConnection);
+    
     [self.stillImageInput captureStillImageAsynchronouslyFromConnection:videoConnection
       completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error) {
       if (imageDataSampleBuffer != NULL) {
           NSData *imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
-          UIImage *tmp = [UIImage imageWithData:imageData];
-          [self classifyObjectsFromInputImage:tmp];
-          [self predictDepthMapFromInputImage:tmp];
+          UIImage *rawOutImg = [UIImage imageWithData:imageData];
+//          UIImage *scaledImg = [self imageWithImage:rawOutImg scaledToSize:CGSizeMake(480, 600)];
+          [self classifyObjectsFromInputImage:rawOutImg];
+          // Depth map now has object predictions
+          [self predictDepthMapFromInputImage:rawOutImg];
       }
   }];
 }
-
 
 #pragma mark - Status label + other labels
 
@@ -278,16 +368,6 @@
       [[UIColor greenColor] setStroke];
     
     for (Prediction* pred in preds) {
-        // Generate new rectangle scaled:
-        // TODO: verify that these are mapped correctly.
-        // NOTE: full image dimensions are width * scale, and height * scale
-//        float width = pred.BBox.size.width * img.size.width * img.scale;
-//        float height = pred.BBox.size.height * img.size.height * img.scale;
-//        float x = pred.BBox.origin.x * img.size.width * img.scale;
-//        float y = height - (pred.BBox.origin.y * img.size.height * img.scale);
-        
-//        CGRect scaledRect = CGRectMake(x, y, width, height);
-        
         NSMutableParagraphStyle* textStyle = NSMutableParagraphStyle.defaultParagraphStyle.mutableCopy;
         textStyle.alignment = NSTextAlignmentLeft;
 
@@ -295,10 +375,9 @@
 
         [[NSString stringWithFormat:@"%@ %0.2f %%", pred.Label, pred.Confidence * 100] drawInRect:pred.BBox withAttributes:textFontAttributes];
         
-        //UIRectFrame(scaledRect);
         UIRectFrame(pred.BBox);
         
-        NSLog(@"rectCoords {x,y,width,height} = \"%@\"", NSStringFromCGRect(pred.BBox));
+        //NSLog(@"rectCoords {x,y,width,height} = \"%@\"", NSStringFromCGRect(pred.BBox));
     }
     
       UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
@@ -346,7 +425,7 @@
     
     // NOTE: unsure about options field:
     self.handler = [[VNImageRequestHandler alloc] initWithCGImage: imageRef
-                                                      orientation:[self getImgOrientation]
+                                                      orientation:[self getImgOrientation:false]
                                                           options:@{VNImageOptionCIContext : self.imagePlatform.imagePlatformCoreContext}];
     
     // object classification:
@@ -358,14 +437,16 @@
     
     [self updateFPSClassifyText:[NSString stringWithFormat:@"Classify FPS: %.2f", -1.0/[start timeIntervalSinceNow]]];
 
-    [predictions removeAllObjects];
+    [self.predictions removeAllObjects];
+    self.predictions = predictions;
 }
     
 
 - (void)predictDepthMapFromInputImage:(UIImage*)inputImage {
     NSError *error = nil;
+
     
-    NSLog(@"image dimensions: %.3f by %.3f, scale: %.3f", inputImage.size.width, inputImage.size.height, inputImage.scale);
+    NSLog(@"Input image dimensions: %.3f by %.3f, scale: %.3f", inputImage.size.width, inputImage.size.height, inputImage.scale);
 
     VNRequestCompletionHandler completionHandler =  ^(VNRequest *request, NSError * _Nullable error) {
         NSArray *results = request.results;
@@ -382,6 +463,9 @@
                     //int sizeZ = [multiArrayValue.shape[0] intValue];
                     int sizeY = [multiArrayValue.shape[1] intValue];
                     int sizeX = [multiArrayValue.shape[2] intValue];
+                   // todo: check sizeY and sizeX values,.
+                    NSLog(@"sizeX: %d, sizeY: %d", sizeX, sizeY);
+                    
                     
                     [self.imagePlatform prepareImagePlatformContextFromResultData:pData
                                                                  pixelSizeInBytes:pixelSizeInBytes
@@ -389,8 +473,12 @@
                                                                             sizeY:sizeY];
                     
                     dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
-                        self.disparityImage = [self.imagePlatform createDisperityDepthImage];
-                        //self.depthImage =  [self.imagePlatform createBGRADepthImage];
+                        UIImage *rawOutImg = [self.imagePlatform createDisperityDepthImage];
+                        UIImage *scaledImg = [self imageWithImage:rawOutImg scaledToSize:CGSizeMake(480, 640)];
+                        
+//                        self.disparityImage = [self drawRectanglesOnImage:scaledImg predictions:self.predictions];
+                        self.disparityImage = scaledImg;
+                        
                         [self didPrepareImages];
                     });
                 }
@@ -400,10 +488,11 @@
     
     
     self.request = [[VNCoreMLRequest alloc] initWithModel:self.model completionHandler:completionHandler];
+    self.request.imageCropAndScaleOption = VNImageCropAndScaleOptionScaleFill;
     CGImageRef imageRef = [inputImage asCGImageRef];
     self.handler = [[VNImageRequestHandler alloc] initWithCGImage: imageRef
+                                                      orientation:[self getImgOrientation:true]
                                                           options:@{VNImageOptionCIContext : self.imagePlatform.imagePlatformCoreContext}];
-    //[self.handler performRequests:self.request];
     [self updateStatusLabelText:@"Predicting depth map..."];
     
     NSDate *start = [NSDate date];
@@ -418,14 +507,19 @@
         self.handler = nil;
         self.request = nil;
         
-        //self.textView.stringValue = NSLocalizedString(@"depthPrediction.didPrepareImages", @"Images are ready");
         NSLog(@"Images are ready");
         [self updateStatusLabelText:@"Images are ready"];
 
         if (self.disparityImage) {
             [self.disparityImageImageView setContentMode:UIViewContentModeScaleAspectFit];
-            [self.disparityImageImageView setImage:self.disparityImage];
-            self.disparityImageImageView.transform = CGAffineTransformMakeRotation(M_PI_2);
+            [self.disparityImageImageView setImage:[self drawRectanglesOnImage:self.disparityImage predictions:self.predictions]];
+            
+            
+            // NOTE: Assume at this point, we have predictions too:
+            if (self.predictions) {
+                [self convertToAvgDepth:self.predictions depthMap:self.disparityImage];
+                NSLog(@"predictions: %@", self.predictions);
+            }
         }
         
         if (self.classifiedImage) {

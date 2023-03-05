@@ -47,7 +47,7 @@
                <rdf:li>0.00010081698565045372</rdf:li>
             </rdf:Seq>
          </depthData:LensDistortionCoefficients>
-         <depthData:IntrinsicMatrixReferenceWidth>800</depthData:IntrinsicMatrixReferenceWidth>
+         <depthData:IntrinsicMatrixReferenceWidth>480</depthData:IntrinsicMatrixReferenceWidth>
          <depthData:LensDistortionCenterOffsetX>400</depthData:LensDistortionCenterOffsetX>
          <depthData:LensDistortionCenterOffsetY>200</depthData:LensDistortionCenterOffsetY>
          <depthData:Quality>high</depthData:Quality>

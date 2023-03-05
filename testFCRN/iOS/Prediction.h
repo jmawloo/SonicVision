@@ -13,5 +13,8 @@
 @property NSString *Label;
 @property float Confidence;
 @property CGRect BBox;
+@property CGFloat AvgDepth;
+@property (nonatomic, readonly) CGFloat centreX;
+@property (nonatomic, readonly) CGFloat centreY;
 
 @end
