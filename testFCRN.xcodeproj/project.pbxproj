@@ -7,9 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1F04239C2999C424000AC624 /* FCRN.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = E8201F4722EF1A1D0098B7DB /* FCRN.mlmodel */; };
-		1F43CD89298992C700A5E4DA /* WideCameraCaptureOutput.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F43CD88298992C700A5E4DA /* WideCameraCaptureOutput.m */; };
-		1F43CD8C2999B86200A5E4DA /* YOLOv3.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 1F43CD8B2999B86200A5E4DA /* YOLOv3.mlmodel */; };
+		6905F8452992E02500548EA3 /* YOLOv3Int8LUT.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 6905F8432992E02500548EA3 /* YOLOv3Int8LUT.mlmodel */; };
+		6905F8462992E02500548EA3 /* FCRNFP16.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 6905F8442992E02500548EA3 /* FCRNFP16.mlmodel */; };
+		69469DAC29B5509200B71056 /* FCRN.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 69469DAA29B5509200B71056 /* FCRN.mlmodel */; };
+		69469DAD29B5509200B71056 /* YOLOv3.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 69469DAB29B5509200B71056 /* YOLOv3.mlmodel */; };
 		DFEBCEAE290E07B60027B013 /* Prediction.m in Sources */ = {isa = PBXBuildFile; fileRef = DFEBCEAD290E07B60027B013 /* Prediction.m */; };
 		E85B07AF2312C5950047D978 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E85B07AE2312C5950047D978 /* AppDelegate.m */; };
 		E85B07B22312C5950047D978 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E85B07B12312C5950047D978 /* SceneDelegate.m */; };
@@ -25,13 +26,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		1F43CD88298992C700A5E4DA /* WideCameraCaptureOutput.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WideCameraCaptureOutput.m; sourceTree = "<group>"; };
-		1F43CD8A298992F300A5E4DA /* WideCameraCaptureOutput.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WideCameraCaptureOutput.h; sourceTree = "<group>"; };
-		1F43CD8B2999B86200A5E4DA /* YOLOv3.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = YOLOv3.mlmodel; sourceTree = "<group>"; };
+		6905F8432992E02500548EA3 /* YOLOv3Int8LUT.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; name = YOLOv3Int8LUT.mlmodel; path = ../../../../Downloads/YOLOv3Int8LUT.mlmodel; sourceTree = "<group>"; };
+		6905F8442992E02500548EA3 /* FCRNFP16.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; name = FCRNFP16.mlmodel; path = ../../../../Downloads/FCRNFP16.mlmodel; sourceTree = "<group>"; };
+		69469DAA29B5509200B71056 /* FCRN.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; name = FCRN.mlmodel; path = mlmodels/FCRN.mlmodel; sourceTree = SOURCE_ROOT; };
+		69469DAB29B5509200B71056 /* YOLOv3.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; name = YOLOv3.mlmodel; path = mlmodels/YOLOv3.mlmodel; sourceTree = SOURCE_ROOT; };
 		DFEBCEA9290E06C80027B013 /* Prediction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Prediction.h; sourceTree = "<group>"; };
 		DFEBCEAD290E07B60027B013 /* Prediction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Prediction.m; sourceTree = "<group>"; };
-		E8201F4722EF1A1D0098B7DB /* FCRN.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = FCRN.mlmodel; sourceTree = "<group>"; };
-		E85B07AB2312C5950047D978 /* testFCRN-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "testFCRN-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E85B07AB2312C5950047D978 /* testFCRN16-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = "testFCRN16-iOS.app"; path = "testFCRN-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E85B07AD2312C5950047D978 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		E85B07AE2312C5950047D978 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		E85B07B02312C5950047D978 /* SceneDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SceneDelegate.h; sourceTree = "<group>"; };
@@ -65,8 +66,8 @@
 		E8201F4622EF19FA0098B7DB /* mlmodels */ = {
 			isa = PBXGroup;
 			children = (
-				1F43CD8B2999B86200A5E4DA /* YOLOv3.mlmodel */,
-				E8201F4722EF1A1D0098B7DB /* FCRN.mlmodel */,
+				6905F8442992E02500548EA3 /* FCRNFP16.mlmodel */,
+				6905F8432992E02500548EA3 /* YOLOv3Int8LUT.mlmodel */,
 			);
 			name = mlmodels;
 			path = ../mlmodels;
@@ -92,6 +93,8 @@
 				E85B07B12312C5950047D978 /* SceneDelegate.m */,
 				E85B07B32312C5950047D978 /* ViewController.h */,
 				E85B07B42312C5950047D978 /* ViewController.m */,
+				69469DAA29B5509200B71056 /* FCRN.mlmodel */,
+				69469DAB29B5509200B71056 /* YOLOv3.mlmodel */,
 				DFEBCEAD290E07B60027B013 /* Prediction.m */,
 				DFEBCEA9290E06C80027B013 /* Prediction.h */,
 				E85B07B62312C5950047D978 /* Main.storyboard */,
@@ -99,8 +102,6 @@
 				E85B07BB2312C5970047D978 /* LaunchScreen.storyboard */,
 				E85B07BE2312C5970047D978 /* Info.plist */,
 				E85B07BF2312C5970047D978 /* main.m */,
-				1F43CD88298992C700A5E4DA /* WideCameraCaptureOutput.m */,
-				1F43CD8A298992F300A5E4DA /* WideCameraCaptureOutput.h */,
 			);
 			path = iOS;
 			sourceTree = "<group>";
@@ -126,7 +127,7 @@
 		E8A7365B22ED7BE400309FD0 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				E85B07AB2312C5950047D978 /* testFCRN-iOS.app */,
+				E85B07AB2312C5950047D978 /* testFCRN16-iOS.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -158,7 +159,7 @@
 			);
 			name = "testFCRN-iOS";
 			productName = testFCRN;
-			productReference = E85B07AB2312C5950047D978 /* testFCRN-iOS.app */;
+			productReference = E85B07AB2312C5950047D978 /* testFCRN16-iOS.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -214,15 +215,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1F04239C2999C424000AC624 /* FCRN.mlmodel in Sources */,
+				69469DAD29B5509200B71056 /* YOLOv3.mlmodel in Sources */,
+				6905F8452992E02500548EA3 /* YOLOv3Int8LUT.mlmodel in Sources */,
+				69469DAC29B5509200B71056 /* FCRN.mlmodel in Sources */,
 				E85B07D62312CBA00047D978 /* ImagePlatform.m in Sources */,
 				DFEBCEAE290E07B60027B013 /* Prediction.m in Sources */,
-				1F43CD8C2999B86200A5E4DA /* YOLOv3.mlmodel in Sources */,
 				E85B07B52312C5950047D978 /* ViewController.m in Sources */,
 				E85B07AF2312C5950047D978 /* AppDelegate.m in Sources */,
 				E85B07C02312C5970047D978 /* main.m in Sources */,
+				6905F8462992E02500548EA3 /* FCRNFP16.mlmodel in Sources */,
 				E85B07B22312C5950047D978 /* SceneDelegate.m in Sources */,
-				1F43CD89298992C700A5E4DA /* WideCameraCaptureOutput.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
